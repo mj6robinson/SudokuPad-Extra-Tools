@@ -136,7 +136,7 @@ function dobuleClickSetup() {
                 if(Framework.app.tool == 'colour') {
                     if(sameColours.some(colour => colour == digit)) {
                         if(!Framework.app.puzzle.selectedCells.every(cell => cell.colours.includes(digit))) {
-                            var values = Framework.app.puzzle.cells.filter(cell => cell.colours.includes(digit) || Framework.app.puzzle.selectedCells.includes(cell)).filter(c => c.candidates.concat(c.givenCentremarks).length > 0).map(c => c.candidates.concat(c.givenCentremarks)).reduce((a, b) => a.filter(c => b.includes(c)));
+                            var values = Framework.app.puzzle.cells.filter(cell => cell.colours.includes(digit) || Framework.app.puzzle.selectedCells.includes(cell)).filter(c => c.candidates.concat(c.givenCentremarks).length > 0).map(c => c.candidates.concat(c.givenCentremarks)).reduce((a, b) => a.filter(c => b.includes(c)), ['1', '2', '3', '4', '5', '6', '7', '8', '9']);
                             for(var val = 1; val <= 9; val++) {
                                 var value = val.toString();
                                 Framework.app.puzzle.selectedCells.forEach(cell => {
@@ -452,9 +452,9 @@ function autoEraseSame(targetCell, value, useCandidates) {
                 if(valueCell) {
                     values = [valueCell.given || valueCell.value];
                 } else if(useCandidates && otherCells.some(c => c.candidates.concat(c.givenCentremarks).length > 0)) {
-                    values = otherCells.filter(c => c.candidates.concat(c.givenCentremarks).length > 0).map(c => c.candidates.concat(c.givenCentremarks)).reduce((a, b) => a.filter(c => b.includes(c)));
+                    values = otherCells.filter(c => c.candidates.concat(c.givenCentremarks).length > 0).map(c => c.candidates.concat(c.givenCentremarks)).reduce((a, b) => a.filter(c => b.includes(c)), ['1', '2', '3', '4', '5', '6', '7', '8', '9']);
                 }
-                targetCell.candidates.concat(c.givenCentremarks).filter(candidate => !values.includes(candidate)).forEach(candidate => {
+                targetCell.candidates.concat(targetCell.givenCentremarks).filter(candidate => !values.includes(candidate)).forEach(candidate => {
                     eraseCell(targetCell, candidate);
                 });
             }
@@ -473,58 +473,58 @@ function autoEraseArrows(targetCell, useCandidates) {
                 col += col === null ? Math.floor(point[1]) : Math.sign(Math.floor(point[1]) - col);
                 if(!circleCell) {
                     circleCell = Framework.app.grid.getCell(row, col);
+
                 } else {
                     arrowCells.push(Framework.app.grid.getCell(row, col));
                 }
             }        
         });
         var circleValues = [];
-        if(!circleCell || arrowCells.length < 0) return;
-
-        if(circleCell.given || circleCell.value || useCandidates) {
-            circleValues = getAllValues([circleCell], [], true);
-        }
-
-        if(!targetCell || arrowCells.includes(targetCell)) {
-            arrowCells.filter(c => !c.given && !c.value).forEach(c => {
-                if(!targetCell || targetCell == c) {
-                    var otherCells = arrowCells.filter(cell => cell != c);
-                    var values = c.candidates.concat(c.givenCentremarks).map(candidate => parseInt(candidate));
-                    
-                    if(circleValues.length > 0) {
-                        values.forEach(value => {
-                            if(otherCells.length > 0) {
-                                var otherVals = [];
-                                if(otherCells.length > 0 && (otherCells.every(c => c.given || c.value) || useCandidates)) {
-                                    otherVals = calculateValuesInner(arrowCells, c, value, true);
-                                    if(otherVals.every(val => !circleValues.includes(val))) {
-                                        eraseCell(c, value.toString());
-                                    }
-                                }
-                            } else if(!circleValues.includes(value)) {
-                                eraseCell(c, value.toString());
-                            }
-                        });
-                    }
-                }
-            });
-        }
-
-        if(!targetCell || targetCell == circleCell) {
-            var values = circleCell.concat(circleCell.givenCentremarks).map(candidate => parseInt(candidate));
-            var arrowVals = [];
-            if(arrowCells.every(c => c.given || c.value) || useCandidates) {
-                arrowVals = calculateValuesInner(arrowCells, null, null, true);
+        if(circleCell && arrowCells.length > 0) {
+            if(circleCell.given || circleCell.value || useCandidates) {
+                circleValues = getAllValues([circleCell], [], true);
             }
-            if(arrowVals.length > 0) {
-                values.forEach(value => {
-                    if(arrowVals.every(val => value != val)) {
-                        eraseCell(circleCell, value.toString());
+
+            if(!targetCell || arrowCells.includes(targetCell)) {
+                arrowCells.filter(c => !c.given && !c.value).forEach(c => {
+                    if(!targetCell || targetCell == c) {
+                        var otherCells = arrowCells.filter(cell => cell != c);
+                        var values = c.candidates.concat(c.givenCentremarks).map(candidate => parseInt(candidate));
+                        
+                        if(circleValues.length > 0) {
+                            values.forEach(value => {
+                                if(otherCells.length > 0) {
+                                    var otherVals = [];
+                                    if(otherCells.length > 0 && (otherCells.every(c => c.given || c.value) || useCandidates)) {
+                                        otherVals = calculateValuesInner(arrowCells, c, value, true);
+                                        if(otherVals.every(val => !circleValues.includes(val))) {
+                                            eraseCell(c, value.toString());
+                                        }
+                                    }
+                                } else if(!circleValues.includes(value)) {
+                                    eraseCell(c, value.toString());
+                                }
+                            });
+                        }
                     }
                 });
             }
+
+            if(!targetCell || targetCell == circleCell) {
+                var values = circleCell.candidates.concat(circleCell.givenCentremarks).map(candidate => parseInt(candidate));
+                var arrowVals = [];
+                if(arrowCells.every(c => c.given || c.value) || useCandidates) {
+                    arrowVals = calculateValuesInner(arrowCells, null, null, true);
+                }
+                if(arrowVals.length > 0) {
+                    values.forEach(value => {
+                        if(arrowVals.every(val => value != val)) {
+                            eraseCell(circleCell, value.toString());
+                        }
+                    });
+                }
+            }
         }
-        
     });
 }
 
