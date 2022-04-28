@@ -618,9 +618,9 @@ function autoEraseInequality(targetCell, useCandidates) {
             var value = parseInt(otherCell.given || otherCell.value);
             if(!value && useCandidates && cell.candidates.concat(cell.givenCentremarks).length > 0) {
                 if(inequality.part.text === "<") {
-                    value = Math.min.apply(null, otherCell.candidates.concat(cell.givenCentremarks).map(candidate => parseInt(candidate)));
+                    value = Math.min.apply(null, otherCell.candidates.concat(otherCell.givenCentremarks).map(candidate => parseInt(candidate)));
                 } else {
-                    value = Math.max.apply(null, otherCell.candidates.concat(cell.givenCentremarks).map(candidate => parseInt(candidate)));    
+                    value = Math.max.apply(null, otherCell.candidates.concat(otherCell.givenCentremarks).map(candidate => parseInt(candidate)));    
                 }
             }
 
@@ -657,10 +657,10 @@ function autoEraseXVS(targetCell, useCandidates) {
                 if(value) {
                     values = [value];
                 } else if(useCandidates && otherCell.candidates.concat(cell.givenCentremarks).length > 0) {
-                    values = otherCell.candidates.concat(cell.givenCentremarks).map(candidate => parseInt(candidate));
+                    values = otherCell.candidates.concat(otherCell.givenCentremarks).map(candidate => parseInt(candidate));
                 }
                 for(var val = 1; val <= 9; val++) {
-                    if(values.every(value => val != sum - value && val != value) ) {
+                    if(values.every(v => val != sum - v || val == v)) {
                         eraseCell(cell, val.toString());
                     }
                     
