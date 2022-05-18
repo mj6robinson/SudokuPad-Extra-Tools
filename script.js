@@ -1,5 +1,8 @@
 var autoEraserOn = false;
 var knightMove = false;
+var kingMove = false;
+var uniqueBox = false;
+var nonconsecutive = false;
 
 var valuesDiv = null;
 
@@ -20,75 +23,27 @@ dobuleClickSetup();
 addListener();
 
 function addPencilFillButton() {
-    var controls = document.getElementById("controls");
-    var aux = controls.getElementsByClassName("controls-aux")[0];
+    Framework.addToolButtons([{
+        name: 'pencil-mark', title: 'Pencil Mark',
+        content: `<div class="icon"><svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 0 24 24" fill="currentColor"><path d="M 17.854 4.146 a 0.5 0.5 0 0 0 -0.707 0 L 15.5 5.793 L 19.207 9.5 l 1.647 -1.646 a 0.5 0.5 0 0 0 0 -0.708 l -3 -3 z m 0.646 6.061 L 14.793 6.5 L 8.293 13 H 8.5 a 0.5 0.5 0 0 1 0.5 0.5 v 0.5 h 0.5 a 0.5 0.5 0 0 1 0.5 0.5 v 0.5 h 0.5 a 0.5 0.5 0 0 1 0.5 0.5 v 0.5 h 0.5 a 0.5 0.5 0 0 1 0.5 0.5 v 0.207 l 6.5 -6.5 z m -7.468 7.468 A 0.5 0.5 0 0 1 11 17.5 V 17 h -0.5 a 0.5 0.5 0 0 1 -0.5 -0.5 V 16 h -0.5 a 0.5 0.5 0 0 1 -0.5 -0.5 V 15 h -0.5 a 0.5 0.5 0 0 1 -0.5 -0.5 V 14 h -0.5 a 0.499 0.499 0 0 1 -0.175 -0.032 l -0.179 0.178 a 0.5 0.5 0 0 0 -0.11 0.168 l -2 5 a 0.5 0.5 0 0 0 0.65 0.65 l 5 -2 a 0.5 0.5 0 0 0 0.168 -0.11 l 0.178 -0.178 z"/></svg></div>`,
+    }]);
+    Framework.app.refreshControls();
 
-    if(controls) {
-        var pencilFill = document.createElement("button");
-        pencilFill.setAttribute('id', "auto-eraser");
-        pencilFill.setAttribute('title', "Auto Eraser");
-        pencilFill.setAttribute('data-control', "auto-eraser");
-        
-        var icon = document.createElement("div");
-        icon.setAttribute("class", "icon");
-
-        pencilFill.appendChild(icon);
-
-        var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        svg.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:xlink", "http://www.w3.org/1999/xlink");
-        svg.setAttribute('width', "24px");
-        svg.setAttribute('height', "24px");
-        svg.setAttribute('viewBox', "0 0 24 24");
-        icon.appendChild(svg);
-
-        var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-        path.setAttribute('d', "M 17.854 4.146 a 0.5 0.5 0 0 0 -0.707 0 L 15.5 5.793 L 19.207 9.5 l 1.647 -1.646 a 0.5 0.5 0 0 0 0 -0.708 l -3 -3 z m 0.646 6.061 L 14.793 6.5 L 8.293 13 H 8.5 a 0.5 0.5 0 0 1 0.5 0.5 v 0.5 h 0.5 a 0.5 0.5 0 0 1 0.5 0.5 v 0.5 h 0.5 a 0.5 0.5 0 0 1 0.5 0.5 v 0.5 h 0.5 a 0.5 0.5 0 0 1 0.5 0.5 v 0.207 l 6.5 -6.5 z m -7.468 7.468 A 0.5 0.5 0 0 1 11 17.5 V 17 h -0.5 a 0.5 0.5 0 0 1 -0.5 -0.5 V 16 h -0.5 a 0.5 0.5 0 0 1 -0.5 -0.5 V 15 h -0.5 a 0.5 0.5 0 0 1 -0.5 -0.5 V 14 h -0.5 a 0.499 0.499 0 0 1 -0.175 -0.032 l -0.179 0.178 a 0.5 0.5 0 0 0 -0.11 0.168 l -2 5 a 0.5 0.5 0 0 0 0.65 0.65 l 5 -2 a 0.5 0.5 0 0 0 0.168 -0.11 l 0.178 -0.178 z");
-        svg.appendChild(path);
-
-        pencilFill.onclick = function(){
-            pencilMark(true);
-        };
-        aux.appendChild(pencilFill);  
-    } else {
-        setTimeout(addPencilFillButton, 500);
-    }
+    addDownEventHandler('#control-pencil-mark', pencilMark, {passive: false});
 }
 
-function addAutoEraserButton() {
-    var controls = document.getElementById("controls");
-    var aux = controls.getElementsByClassName("controls-aux")[0];
-    
-    if(controls && typeof CtxMenu != 'undefined') {
-        var autoEraser = document.createElement("button");
-        autoEraser.setAttribute('id', "auto-eraser");
-        autoEraser.setAttribute('title', "Auto Eraser");
-        autoEraser.setAttribute('data-control', "auto-eraser");
-        
-        var icon = document.createElement("div");
-        icon.setAttribute("class", "icon");
+function addAutoEraserButton() {    
+    if(typeof CtxMenu != 'undefined') {
+        Framework.addToolButtons([{
+            name: 'auto-eraser', title: 'Auto Eraser',
+            content: `<div class="icon"><svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 0 24 24" fill="currentColor"><path d="M 13.086 6.207 a 2 2 0 0 1 2.828 0 l 3.879 3.879 a 2 2 0 0 1 0 2.828 l -5.5 5.5 A 2 2 0 0 1 12.879 19 H 10.12 a 2 2 0 0 1 -1.414 -0.586 l -2.5 -2.5 a 2 2 0 0 1 0 -2.828 l 6.879 -6.879 z m 0.66 11.34 L 8.453 12.254 L 6.914 13.793 a 1 1 0 0 0 0 1.414 l 2.5 2.5 a 1 1 0 0 0 0.707 0.293 H 12.88 a 1 1 0 0 0 0.707 -0.293 l 0.16 -0.16 z"/></svg></div>`,
+        }]);
+        Framework.app.refreshControls();
 
-        autoEraser.appendChild(icon);
-
-        var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        svg.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:xlink", "http://www.w3.org/1999/xlink");
-        svg.setAttribute('width', "24px");
-        svg.setAttribute('height', "24px");
-        svg.setAttribute('viewBox', "0 0 24 24");
-        icon.appendChild(svg);
-
-        var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-        path.setAttribute('d', "M 13.086 6.207 a 2 2 0 0 1 2.828 0 l 3.879 3.879 a 2 2 0 0 1 0 2.828 l -5.5 5.5 A 2 2 0 0 1 12.879 19 H 10.12 a 2 2 0 0 1 -1.414 -0.586 l -2.5 -2.5 a 2 2 0 0 1 0 -2.828 l 6.879 -6.879 z m 0.66 11.34 L 8.453 12.254 L 6.914 13.793 a 1 1 0 0 0 0 1.414 l 2.5 2.5 a 1 1 0 0 0 0.707 0.293 H 12.88 a 1 1 0 0 0 0.707 -0.293 l 0.16 -0.16 z");
-        svg.appendChild(path);
+        addDownEventHandler('#control-auto-eraser', autoEraserToggle, {passive: false});
+        //addHandler('#control-auto-eraser', 'mousedown.LongTouch', fn, opts);
         
-        autoEraser.onclick = function(){
-            autoEraser.classList.toggle("selectedperm");
-            autoEraserOn = !autoEraserOn;
-            if(autoEraserOn) {
-                main();
-            }
-        };
-        
-        var contextMenu = CtxMenu(autoEraser);
+        var contextMenu = CtxMenu(document.querySelector('#control-auto-eraser'));
         var knightMoveItem = contextMenu.addItem("  Knight Move", function() {
             knightMove = !knightMove;
             if(knightMove) {
@@ -98,9 +53,46 @@ function addAutoEraserButton() {
             }
 
         });
-        aux.appendChild(autoEraser);  
+
+        var kingMoveItem = contextMenu.addItem("  King Move", function() {
+            kingMove = !kingMove;
+            if(kingMove) {
+                kingMoveItem.textContent = "X King Move";
+            } else {
+                kingMoveItem.textContent = "  King Move";   
+            }
+
+        });
+
+        var uniqueBoxItem = contextMenu.addItem("  Unique Box", function() {
+            uniqueBox = !uniqueBox;
+            if(uniqueBox) {
+                uniqueBoxItem.textContent = "X Unique Box";
+            } else {
+                uniqueBoxItem.textContent = "  Unique Box";   
+            }
+
+        });
+
+        var nonconsecutiveItem = contextMenu.addItem("  Nonconsecutive", function() {
+            nonconsecutive = !nonconsecutive;
+            if(nonconsecutive) {
+                nonconsecutiveItem.textContent = "X Nonconsecutive";
+            } else {
+                nonconsecutiveItem.textContent = "  Nonconsecutive";   
+            }
+
+        });
     } else {
         setTimeout(addAutoEraserButton, 500);
+    }
+}
+
+function autoEraserToggle() {
+    autoEraserOn = !autoEraserOn;
+    document.querySelector('#control-auto-eraser').classList.toggle('selectedperm', this.selectMode);
+    if(autoEraserOn) {
+        main();
     }
 }
 
@@ -112,7 +104,9 @@ function addValuesDisplay() {
         valuesDiv.style.display = 'flex';
         valuesDiv.style.justifyContent = 'center';
         valuesDiv.style.alignItems = 'center';
+        valuesDiv.textContent = "Values: ";
         controls.appendChild(valuesDiv);
+        Framework.app.refreshControls();
     } else {
         setTimeout(addValuesDisplay, 500);
     }
@@ -152,7 +146,7 @@ function dobuleClickSetup() {
                                 });
                             }
                         }
-                    }
+                    } 
                 }
                 else if(Framework.app.tool == 'centre') {
                     sameColours.forEach(colour => {
@@ -196,7 +190,7 @@ function setupButtonMenus() {
     var highMenu = {};
     var lowMenu = {};
     var sameMenu = {};
-    
+     
     digits.forEach(digit => {
         if(Framework.app.tool == 'colour'){
             contextMenu[digit.title] = CtxMenu(digit);
@@ -314,6 +308,7 @@ function main() {
         autoEraseInequality();
         autoEraseThermos();
         autoEraseArrows();
+        autoEraseGermanWhisper();
     }
 }
 
@@ -436,6 +431,62 @@ function autoErase(cell, useCandidates) {
             });
         });
     }
+
+    if(kingMove) {
+        var offsets = [ {row: -1, col: -1}, 
+                        {row: -1, col: 1}, 
+                        {row:  1, col: -1}, 
+                        {row:  1, col: 1} ];
+        Framework.app.puzzle.cells.filter(c => c.given || c.value || useCandidates && c.candidates.concat(c.givenCentremarks).length == 1).forEach(c => {
+            var value = c.given || c.value || c.candidates.concat(c.givenCentremarks)[0];
+
+            offsets.forEach(offset => {
+                var row = c.row + offset.row;
+                var col = c.col + offset.col;  
+                if(row >= 0 && row <= 8 && col >= 0 && col <= 8) {
+                    eraseRowCol(row, col, value);
+                }
+            });
+        });
+    }
+
+    if(uniqueBox) {
+        var offsets = [ {row: 0, col: 0},  {row: 0, col: 3}, {row: 0, col: 6}, 
+                        {row: 3, col: 0},  {row: 3, col: 3}, {row: 3, col: 6},
+                        {row: 6, col: 0},  {row: 6, col: 3}, {row: 6, col: 6}];
+        Framework.app.puzzle.cells.filter(c => c.given || c.value || useCandidates && c.candidates.concat(c.givenCentremarks).length == 1).forEach(c => {
+            var value = c.given || c.value || c.candidates.concat(c.givenCentremarks)[0];
+
+            offsets.forEach(offset => {
+                var row = c.row + offset.row;
+                var col = c.col + offset.col;  
+                if(row > 8) {
+                    row -= 9;
+                }
+                if(col > 8) {
+                    col -= 9;
+                }
+                eraseRowCol(row, col, value);
+            });
+        });
+    }
+
+    if(nonconsecutive) {
+        var offsets = [ {row: -1, col: 0}, {row: 1, col: 0}, 
+                        {row: 0, col: -1}, {row: 0, col: 1}];
+        Framework.app.puzzle.cells.filter(c => c.given || c.value || useCandidates && c.candidates.concat(c.givenCentremarks).length == 1).forEach(c => {
+            var value = parseInt(c.given || c.value || c.candidates.concat(c.givenCentremarks)[0]);
+
+            offsets.forEach(offset => {
+                var row = c.row + offset.row;
+                var col = c.col + offset.col;  
+                if(row >= 0 && row <= 8 && col >= 0 && col <= 8) {
+                    eraseRowCol(row, col, (value - 1).toString());
+                    eraseRowCol(row, col, (value + 1).toString());
+                }
+            });
+        });
+    }
 }
 
 function autoEraseSame(targetCell, value, useCandidates) {
@@ -479,7 +530,7 @@ function autoEraseArrows(targetCell, useCandidates) {
                 }
             }        
         });
-        var circleValues = [];
+        var circleValues = Array.from(Array(9), (_, index) => (index + 1).toString());
         if(circleCell && arrowCells.length > 0) {
             if(circleCell.given || circleCell.value || useCandidates) {
                 circleValues = getAllValues([circleCell], [], true);
@@ -494,7 +545,7 @@ function autoEraseArrows(targetCell, useCandidates) {
                         if(circleValues.length > 0) {
                             values.forEach(value => {
                                 if(otherCells.length > 0) {
-                                    var otherVals = [];
+                                    var otherVals = Array.from(Array(9), (_, index) => (index + 1).toString());
                                     if(otherCells.length > 0 && (otherCells.every(c => c.given || c.value) || useCandidates)) {
                                         otherVals = calculateValuesInner(arrowCells, c, value, true);
                                         if(otherVals.every(val => !circleValues.includes(val))) {
@@ -524,6 +575,47 @@ function autoEraseArrows(targetCell, useCandidates) {
                     });
                 }
             }
+        }
+    });
+}
+
+function autoEraseGermanWhisper(targetCell, useCandidates) {
+    Framework.app.sourcePuzzle.lines?.filter(line => {
+        var rgb = hexToRGBA(line.color);
+        return rgb[1] - rgb[0] - rgb[2] > 0;
+    }).forEach(line => {
+        var lineCells = [];
+        var row = null, col = null;
+        line.wayPoints.forEach((point) => {
+            while(row != Math.floor(point[0]) || col != Math.floor(point[1])) {
+                row += row === null ? Math.floor(point[0]) : Math.sign(Math.floor(point[0]) - row);
+                col += col === null ? Math.floor(point[1]) : Math.sign(Math.floor(point[1]) - col);
+                lineCells.push(Framework.app.grid.getCell(row, col));
+            }        
+        });
+
+        if(!targetCell || lineCells.includes(targetCell)) {
+            lineCells.filter(c => !c.given && !c.value).forEach(c => {
+                if(!targetCell || targetCell == c) {
+                    var index = lineCells.indexOf(c);
+                    var otherCells = lineCells.slice(Math.max(0, index - 1), index + 2).filter(cell => c != cell);
+                    var values = c.candidates.concat(c.givenCentremarks).map(candidate => parseInt(candidate));
+                    values.forEach(value => {
+                        otherCells.forEach(otherCell => {
+                            var otherVals = Array.from(Array(9), (_, index) => (index + 1).toString());
+                            var otherValue = parseInt(otherCell.given || otherCell.value);
+                            if(otherValue) {
+                                otherVals = [otherValue];
+                            } else if(useCandidates && otherCell.candidates.concat(otherCell.givenCentremarks).length > 0) {
+                                otherVals = otherCell.candidates.concat(otherCell.givenCentremarks).map(candidate => parseInt(candidate));
+                            }
+                            if(otherVals.length > 0 && otherVals.every(v => Math.abs(value - v) < 5 )) {
+                                eraseCell(c, value.toString());
+                            }
+                        });
+                    });
+                }
+            });
         }
     });
 }
@@ -577,8 +669,8 @@ function autoEraseThermos(targetCell, useCandidates) {
 }
 
 function isThermo(thermo) {
-    return  Framework.app.sourcePuzzle.overlays?.some(lay => lay.backgroundColor.slice(0, 6) == thermo.line.color.slice(0, 6) && lay.center[0] == thermo.line.wayPoints[0][0] && lay.center[1] == thermo.line.wayPoints[0][1] ) || 
-            Framework.app.sourcePuzzle.underlays?.some(lay => lay.backgroundColor.slice(0, 6) == thermo.line.color.slice(0, 6) && lay.center[0] == thermo.line.wayPoints[0][0] && lay.center[1] == thermo.line.wayPoints[0][1] );
+    return  Framework.app.sourcePuzzle.overlays?.filter(lay => lay.rounded && lay.height >= 0.8 && lay.width >= 0.8).some(lay => lay.backgroundColor.slice(0, 6) == thermo.line.color.slice(0, 6) && lay.center[0] == thermo.line.wayPoints[0][0] && lay.center[1] == thermo.line.wayPoints[0][1] ) || 
+            Framework.app.sourcePuzzle.underlays?.filter(lay => lay.rounded && lay.height >= 0.8 && lay.width >= 0.8).some(lay => lay.backgroundColor.slice(0, 6) == thermo.line.color.slice(0, 6) && lay.center[0] == thermo.line.wayPoints[0][0] && lay.center[1] == thermo.line.wayPoints[0][1] );
 }
 
 function autoEraseKropkis(targetCell, useCandidates) {
@@ -783,6 +875,7 @@ function pencilMark(fill = true) {
         autoEraseThermos(cell, true);
         autoEraseCages(cell, true);
         autoEraseArrows(cell, true);
+        autoEraseGermanWhisper(cell, true);
         autoEraseSame(cell, null, true);
         
         autoColour(cell, true);
@@ -817,7 +910,7 @@ function displayValues(selectedCells) {
     calculateValuesTimeout = null;
 }
 
-function calculateValuesInner(selectedCells, targetCell, targetCandidate) {
+function calculateValuesInner(selectedCells, targetCell, targetCandidate, blanks) {
     var cellGroups = getCellGroups(selectedCells);
 
     var usedCells = [];
@@ -826,9 +919,9 @@ function calculateValuesInner(selectedCells, targetCell, targetCandidate) {
         var cells = getNextCellGroup(selectedCells, cellGroups, usedCells);
         var cellGroupVals;
         if(cells.includes(targetCell)) {
-            cellGroupVals= getAllValues(cells.filter(c => c != targetCell), [targetCandidate]);
+            cellGroupVals= getAllValues(cells.filter(c => c != targetCell), [targetCandidate], blanks);
         } else {
-            cellGroupVals= getAllValues(cells, []);
+            cellGroupVals= getAllValues(cells, [], blanks);
         }
 
         if(vals) {
@@ -920,4 +1013,9 @@ function getAllValues(cells, candidates, blanks) {
     });
 
     return values.filter((value, index, self) => self.indexOf(value) === index).sort((a, b) => a - b);
+}
+
+function hexToRGBA(hex) {
+    var len = hex.length - 1;
+    return hex.replace('#', '').match(new RegExp('(.{' + 2 + '})', 'g')).map(l => { return parseInt(len%2 ? l+l : l, 16) });
 }

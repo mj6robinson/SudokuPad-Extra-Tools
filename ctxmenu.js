@@ -14,11 +14,14 @@ const ECtxMenuNames = {
 
 
 class CtxMenuManagerClass {
+
+	pressTimer;
+
 	constructor(){
 		this._currentMenuVisible = null;
 		this._ctxMenus = new Map();
 
-		document.addEventListener('contextmenu', this._eventOpenMenu.bind(this));
+		document.addEventListener('contextmenu', this._eventOpenMenu.bind(this));		
 
 		const scripts = document.getElementsByTagName('script');
 		const path = scripts[scripts.length - 1].src.split('?')[0];
@@ -272,6 +275,25 @@ function CtxMenu(element){
 	if (element == undefined){
 		element = document;
 	}
+
+	element.addEventListener('touchend', function(){
+		clearTimeout(this.pressTimer);
+		// Clear timeout
+		return false;
+	});
+
+	var rect = element.getBoundingClientRect();
+	  
+	element.addEventListener('touchstart', function(){
+		// Set timeout
+		this.pressTimer = window.setTimeout(function() { 
+			var e = element.ownerDocument.createEvent('MouseEvents');
+			e.initMouseEvent('contextmenu', true, true, element.ownerDocument.defaultView, 1, rect.right, rect.top, rect.left, rect.bottom, false,false, false, false, 2, null);
+			return !element.dispatchEvent(e); 
+		},1000);
+		return false; 
+	}); 
+
 	if (ctxMenuManager.getMenuFromElement(element) != undefined) {
 		return ctxMenuManager.getMenuFromElement(element);
 	}
