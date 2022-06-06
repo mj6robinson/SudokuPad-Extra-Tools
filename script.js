@@ -138,15 +138,11 @@ function dobuleClickSetup() {
                                 cells.forEach(cell => {
                                     if(values.includes(val.toString())) {
                                         if(!cell.propContains('centre', value)) {
-                                            Framework.app.deselect();
-                                            Framework.app.puzzle.select(cell);
-                                            Framework.app.act({type: 'candidates', arg: value});
+                                            cell.propSet('centre', value);
                                         }
                                     } else {
                                         if(cell.propContains('centre', value)) {
-                                            Framework.app.deselect();
-                                            Framework.app.puzzle.select(cell);
-                                            Framework.app.act({type: 'candidates', arg: value});
+                                            cell.propUnset('centre', value);
                                         }
                                     }
                                 });
@@ -162,15 +158,11 @@ function dobuleClickSetup() {
                             Framework.app.puzzle.cells.filter(cell => cell.colours.includes(colour) && !cells.includes(cell)).forEach(cell => {
                                 if(remove) {
                                     if(cell.propContains('centre', digit)) {
-                                        Framework.app.deselect();
-                                        Framework.app.puzzle.select(cell);
-                                        Framework.app.act({type: 'candidates', arg: digit});
+                                        cell.propUnset('centre', digit);
                                     }
                                 } else {
                                     if(!cell.propContains('centre', digit)) {
-                                        Framework.app.deselect();
-                                        Framework.app.puzzle.select(cell);
-                                        Framework.app.act({type: 'candidates', arg: digit});
+                                        cell.propSet('centre', digit);
                                     }
                                 }
                             });
