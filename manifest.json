@@ -1,7 +1,7 @@
 {
   "name": "SudokuPad Extra Tools",
   "manifest_version": 2,
-  "version": "1.7",
+  "version": "1.9",
   "description": "Adds extra tools for SudokuPad (Cracking The Cryptic web app). Pencil mark all candidates, Auto erase pencil marks, Give all possible sum of selected cells based on candidates marks",
   "permissions": [
     "activeTab"
