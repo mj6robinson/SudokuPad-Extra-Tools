@@ -15,6 +15,7 @@ var highColours = [];
 var lowColours = [];
 
 var sameColours = [];
+var friendlyColours = [];
 
 addPencilFillButton();
 addAutoEraserButton();
@@ -126,21 +127,26 @@ function dobuleClickSetup() {
         });
 
         Framework.app.addEventListener('tool-handleToolButton', function(digit) {
-            if(Framework.app.puzzle.selectedCells.length > 0) {
+            var cells = Framework.app.puzzle.selectedCells.map(x => x);
+            if(cells.length > 0) {
                 if(Framework.app.tool == 'colour') {
                     if(sameColours.some(colour => colour == digit)) {
-                        if(!Framework.app.puzzle.selectedCells.every(cell => cell.colours.includes(digit))) {
-                            var values = Framework.app.puzzle.cells.filter(cell => cell.colours.includes(digit) || Framework.app.puzzle.selectedCells.includes(cell)).filter(c => c.candidates.concat(c.givenCentremarks).length > 0).map(c => c.candidates.concat(c.givenCentremarks)).reduce((a, b) => a.filter(c => b.includes(c)), ['1', '2', '3', '4', '5', '6', '7', '8', '9']);
+                        if(!cells.every(cell => cell.colours.includes(digit))) {
+                            var values = Framework.app.puzzle.cells.filter(cell => cell.colours.includes(digit) || cells.includes(cell)).filter(c => c.candidates.concat(c.givenCentremarks).length > 0).map(c => c.candidates.concat(c.givenCentremarks)).reduce((a, b) => a.filter(c => b.includes(c)), ['1', '2', '3', '4', '5', '6', '7', '8', '9']);
                             for(var val = 1; val <= 9; val++) {
                                 var value = val.toString();
-                                Framework.app.puzzle.selectedCells.forEach(cell => {
+                                cells.forEach(cell => {
                                     if(values.includes(val.toString())) {
                                         if(!cell.propContains('centre', value)) {
-                                            cell.propSet('centre', value);
+                                            Framework.app.deselect();
+                                            Framework.app.puzzle.select(cell);
+                                            Framework.app.act({type: 'candidates', arg: value});
                                         }
                                     } else {
                                         if(cell.propContains('centre', value)) {
-                                            cell.propUnset('centre', value);
+                                            Framework.app.deselect();
+                                            Framework.app.puzzle.select(cell);
+                                            Framework.app.act({type: 'candidates', arg: value});
                                         }
                                     }
                                 });
@@ -150,24 +156,29 @@ function dobuleClickSetup() {
                 }
                 else if(Framework.app.tool == 'centre') {
                     sameColours.forEach(colour => {
-                        var cells = Framework.app.puzzle.selectedCells.filter(cell => cell.colours.includes(colour));
+                        var cells = cells.filter(cell => cell.colours.includes(colour));
                         if(cells.length > 0) {
                             var remove = cells.every(cell => cell.candidates.concat(cell.givenCentremarks).includes(digit));
                             Framework.app.puzzle.cells.filter(cell => cell.colours.includes(colour) && !cells.includes(cell)).forEach(cell => {
                                 if(remove) {
                                     if(cell.propContains('centre', digit)) {
-                                        cell.propUnset('centre', digit);
+                                        Framework.app.deselect();
+                                        Framework.app.puzzle.select(cell);
+                                        Framework.app.act({type: 'candidates', arg: digit});
                                     }
                                 } else {
                                     if(!cell.propContains('centre', digit)) {
-                                        cell.propSet('centre', digit);
+                                        Framework.app.deselect();
+                                        Framework.app.puzzle.select(cell);
+                                        Framework.app.act({type: 'candidates', arg: digit});
                                     }
                                 }
                             });
                         }
                     });
-                    
                 }
+                Framework.app.deselect();
+                Framework.app.puzzle.select(cells);
             }
         });
 
@@ -190,6 +201,7 @@ function setupButtonMenus() {
     var highMenu = {};
     var lowMenu = {};
     var sameMenu = {};
+    var friendlyMenu = {};
      
     digits.forEach(digit => {
         if(Framework.app.tool == 'colour'){
@@ -275,6 +287,18 @@ function setupButtonMenus() {
                 } 
                 main();   
             });
+
+            friendlyMenu[digit.title] = contextMenu[digit.title].addItem("  Friendly", function() {
+                var friendlyIndex = friendlyColours.indexOf(digit.title);
+                if(friendlyIndex > -1) {
+                    friendlyColours.splice(friendlyIndex, 1);
+                    friendlyMenu[digit.title].textContent = "  Friendly";
+                } else {
+                    friendlyColours.push(digit.title);
+                    friendlyMenu[digit.title].textContent = "X Friendly";
+                } 
+                main();   
+            });
         } else {
             ctxMenuManager._ctxMenus.delete(digit);
         }
@@ -299,7 +323,7 @@ function main() {
     Framework.app.puzzle.cells.forEach(cell => {
         autoColour(cell);
         if(autoEraserOn && (cell.candidates.concat(cell.givenCentremarks).length > 0 || cell.pencilmarks.length > 0)) {
-            autoErase(cell);
+            autoErase(cell, false, false);
         }
     });
     if (autoEraserOn) {
@@ -397,20 +421,42 @@ function autoErase(cell, useCandidates) {
 
     if(lowColours.some(colour => cell.colours.includes(colour))) {
         cell.candidates.concat(cell.givenCentremarks).filter(candidate => parseInt(candidate) >= 5).forEach(candidate => {
-            eraseCell(cell, candidate);
+            eraseCell(cell, candidate, log);
+        })
+    }
+
+    if(friendlyColours.some(colour => cell.colours.includes(colour))) {
+        cell.candidates.concat(cell.givenCentremarks).filter(candidate => {
+            var val = parseInt(candidate);
+            var box = (Math.floor(cell.row / 3) * 3) + Math.floor(cell.col / 3) + 1;
+
+            return val != cell.row + 1 && val != cell.col + 1 && val != box;
+        }).forEach(candidate => {
+            eraseCell(cell, candidate, log);
         })
     }
 
     Framework.app.currentPuzzle.cages.filter(cage => cage.unique != false).forEach(cage => {
         var cageCells = getCageCells(cage);
         if(cageCells.includes(cell)) {
-            cageCells.filter(c => c != cell && (c.given || c.value)).forEach(c => {
+            cageCells.filter(c => c != cell && (c.given || c.value || c.candidates.concat(c.givenCentremarks).length == 1)).forEach(c => {
                 var value = c.given || c.value;
                 if(!value && useCandidates && c.candidates.concat(c.givenCentremarks).length == 1) {
                     value = c.candidates.concat(c.givenCentremarks)[0];
                 }
-                eraseCell(cell, value);
+                if(value) {
+                    eraseCell(cell, value);
+                }
             });
+
+            if(useCandidates) {
+                var group = findGroup(cageCells.filter(c => c != cell));
+                if(group != null) {
+                    group.forEach(value => {
+                        eraseCell(cell, value);
+                    });
+                }
+            }
         }
     });
 
@@ -489,6 +535,44 @@ function autoErase(cell, useCandidates) {
     }
 }
 
+function findGroup(cells) {
+    var cellGroups = [];
+    for (var i = 0; i < Math.pow(2, cells.length); i++) {
+        var cellGroup = [];
+        cells.forEach((cell, index) => {
+            if ((i & Math.pow(2, index))) {
+                cellGroup.push(cell);
+            }
+        })
+        if (cellGroup.length > 0) {
+            cellGroups.push(cellGroup);
+        }
+    }
+    cellGroups =  cellGroups
+        .filter(cellGroup => cellGroup.every(c => {
+            var length = c.candidates.concat(c.givenCentremarks).length;
+            return length > 0 && length <= cellGroup.length;
+        }))
+        .sort((a, b) => a.length - b.length);
+
+    var candidates = null;
+    cellGroups.forEach(cellGroup => {   
+        var testCandidates = [].concat.apply([], cellGroup.map(otherCell => {
+            var otherCandidates = otherCell.candidates.concat(otherCell.givenCentremarks)
+            if(otherCandidates.length == 0) {
+                return Array.from(Array(9), (_, index) => (index + 1).toString());
+            }
+            return otherCandidates;
+        })).filter((value, index, self) => self.indexOf(value) === index);
+
+        if(cellGroup.length == testCandidates.length) {
+            candidates = testCandidates;
+            return;
+        }
+    });
+    return candidates;
+}
+
 function autoEraseSame(targetCell, value, useCandidates) {
     if(sameColours.some(colour => targetCell.colours.includes(colour))) {
         sameColours.filter(colour => targetCell.colours.includes(colour)).forEach(colour => {
@@ -530,7 +614,7 @@ function autoEraseArrows(targetCell, useCandidates) {
                 }
             }        
         });
-        var circleValues = Array.from(Array(9), (_, index) => (index + 1).toString());
+        var circleValues = Array.from(Array(9), (_, index) => (index + 1));
         if(circleCell && arrowCells.length > 0) {
             if(circleCell.given || circleCell.value || useCandidates) {
                 circleValues = getAllValues([circleCell], [], true);
@@ -545,7 +629,7 @@ function autoEraseArrows(targetCell, useCandidates) {
                         if(circleValues.length > 0) {
                             values.forEach(value => {
                                 if(otherCells.length > 0) {
-                                    var otherVals = Array.from(Array(9), (_, index) => (index + 1).toString());
+                                    var otherVals = Array.from(Array(9), (_, index) => (index + 1));
                                     if(otherCells.length > 0 && (otherCells.every(c => c.given || c.value) || useCandidates)) {
                                         otherVals = calculateValuesInner(arrowCells, c, value, true);
                                         if(otherVals.every(val => !circleValues.includes(val))) {
@@ -669,8 +753,8 @@ function autoEraseThermos(targetCell, useCandidates) {
 }
 
 function isThermo(thermo) {
-    return  Framework.app.sourcePuzzle.overlays?.filter(lay => lay.rounded && lay.height >= 0.8 && lay.width >= 0.8).some(lay => lay.backgroundColor.slice(0, 6) == thermo.line.color.slice(0, 6) && lay.center[0] == thermo.line.wayPoints[0][0] && lay.center[1] == thermo.line.wayPoints[0][1] ) || 
-            Framework.app.sourcePuzzle.underlays?.filter(lay => lay.rounded && lay.height >= 0.8 && lay.width >= 0.8).some(lay => lay.backgroundColor.slice(0, 6) == thermo.line.color.slice(0, 6) && lay.center[0] == thermo.line.wayPoints[0][0] && lay.center[1] == thermo.line.wayPoints[0][1] );
+    return  Framework.app.sourcePuzzle.overlays?.filter(lay => lay.rounded && lay.height >= 0.7 && lay.width >= 0.7).some(lay => lay.backgroundColor.slice(0, 6) == thermo.line.color.slice(0, 6) && lay.center[0] == thermo.line.wayPoints[0][0] && lay.center[1] == thermo.line.wayPoints[0][1] ) || 
+            Framework.app.sourcePuzzle.underlays?.filter(lay => lay.rounded && lay.height >= 0.7 && lay.width >= 0.7).some(lay => lay.backgroundColor.slice(0, 6) == thermo.line.color.slice(0, 6) && lay.center[0] == thermo.line.wayPoints[0][0] && lay.center[1] == thermo.line.wayPoints[0][1] );
 }
 
 function autoEraseKropkis(targetCell, useCandidates) {
@@ -857,16 +941,17 @@ function getCageCells(cage) {
 }
 
 function pencilMark(fill = true) {
+    var cells = Framework.app.puzzle.selectedCells.length > 0 ? Framework.app.puzzle.selectedCells.map(x => x) : Framework.app.puzzle.cells;
     if(fill) {
-        Framework.app.puzzle.selectedCells.filter(cell => !cell.given && !cell.value && cell.givenCentremarks.length == 0).forEach(cell => {
+        cells.filter(cell => !cell.given && !cell.value && cell.givenCentremarks.length == 0).forEach(cell => {
             for(var value = 1; value <= 9; value++) {
                 if(!cell.propContains('centre', value.toString())) {
-                    cell.propSet('centre', value.toString());
+                    cell.propSet('centre', value.toString())
                 }
             }
         });
     }
-    Framework.app.puzzle.selectedCells.forEach(cell => {
+    cells.forEach(cell => {
         autoErase(cell, true);
         
         autoEraseKropkis(cell, true);
@@ -878,12 +963,14 @@ function pencilMark(fill = true) {
         autoEraseGermanWhisper(cell, true);
         autoEraseSame(cell, null, true);
         
+        autoErase(cell, true);
         autoColour(cell, true);
     });
     if(fill) {
         pencilMark(false);
+    } else {
+        calculateValues();
     }
-    calculateValues();
 }
 
 function calculateValues() {
