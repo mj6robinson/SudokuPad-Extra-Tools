@@ -127,7 +127,7 @@ function dobuleClickSetup() {
         });
 
         Framework.app.addEventListener('tool-handleToolButton', function(digit) {
-            var cells = Framework.app.puzzle.selectedCells.map(x => x);
+            var cells = Framework.app.puzzle.selectedCells;
             if(cells.length > 0) {
                 if(Framework.app.tool == 'colour') {
                     if(sameColours.some(colour => colour == digit)) {
@@ -169,8 +169,6 @@ function dobuleClickSetup() {
                         }
                     });
                 }
-                Framework.app.deselect();
-                Framework.app.puzzle.select(cells);
             }
         });
 
