@@ -17,11 +17,20 @@ var lowColours = [];
 var sameColours = [];
 var friendlyColours = [];
 
-addPencilFillButton();
-addAutoEraserButton();
-addValuesDisplay();
-dobuleClickSetup();
-addListener();
+
+setup();
+
+function setup(){
+    if(typeof Framework === 'function' && typeof Framework.app === 'object') {
+        addPencilFillButton();
+        addAutoEraserButton();
+        addValuesDisplay();
+        dobuleClickSetup();
+        addListener();
+    } else {
+        setTimeout(setup, 100);
+    } 
+}
 
 function addPencilFillButton() {
     Framework.addToolButtons([{
