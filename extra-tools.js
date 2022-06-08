@@ -13,6 +13,9 @@ var evenColours = [];
 
 var highColours = [];
 var lowColours = [];
+var smallColours = [];
+var mediumColours = [];
+var largeColours = [];
 
 var sameColours = [];
 var friendlyColours = [];
@@ -136,15 +139,14 @@ function dobuleClickSetup() {
         });
 
         Framework.app.addEventListener('tool-handleToolButton', function(digit) {
-            var cells = Framework.app.puzzle.selectedCells;
-            if(cells.length > 0) {
+            if(Framework.app.puzzle.selectedCells.length > 0) {
                 if(Framework.app.tool == 'colour') {
                     if(sameColours.some(colour => colour == digit)) {
-                        if(!cells.every(cell => cell.colours.includes(digit))) {
-                            var values = Framework.app.puzzle.cells.filter(cell => cell.colours.includes(digit) || cells.includes(cell)).filter(c => c.candidates.concat(c.givenCentremarks).length > 0).map(c => c.candidates.concat(c.givenCentremarks)).reduce((a, b) => a.filter(c => b.includes(c)), ['1', '2', '3', '4', '5', '6', '7', '8', '9']);
+                        if(!Framework.app.puzzle.selectedCells.every(cell => cell.colours.includes(digit))) {
+                            var values = Framework.app.puzzle.cells.filter(cell => cell.colours.includes(digit) || Framework.app.puzzle.selectedCells.includes(cell)).filter(c => c.candidates.concat(c.givenCentremarks).length > 0).map(c => c.candidates.concat(c.givenCentremarks)).reduce((a, b) => a.filter(c => b.includes(c)), ['1', '2', '3', '4', '5', '6', '7', '8', '9']);
                             for(var val = 1; val <= 9; val++) {
                                 var value = val.toString();
-                                cells.forEach(cell => {
+                                Framework.app.puzzle.selectedCells.forEach(cell => {
                                     if(values.includes(val.toString())) {
                                         if(!cell.propContains('centre', value)) {
                                             cell.propSet('centre', value);
@@ -161,7 +163,7 @@ function dobuleClickSetup() {
                 }
                 else if(Framework.app.tool == 'centre') {
                     sameColours.forEach(colour => {
-                        var cells = cells.filter(cell => cell.colours.includes(colour));
+                        var cells = Framework.app.puzzle.selectedCells.filter(cell => cell.colours.includes(colour));
                         if(cells.length > 0) {
                             var remove = cells.every(cell => cell.candidates.concat(cell.givenCentremarks).includes(digit));
                             Framework.app.puzzle.cells.filter(cell => cell.colours.includes(colour) && !cells.includes(cell)).forEach(cell => {
@@ -195,113 +197,62 @@ function setupButtonMenus() {
     var digits = attachedButtons.filter(button => button.className == 'digit');
 
     var contextMenu = {};
-    var oddMenu = {};
-    var evenMenu = {};
-    var highMenu = {};
-    var lowMenu = {};
-    var sameMenu = {};
-    var friendlyMenu = {};
+
+    var oddMenu = {array: oddColours};
+    var evenMenu = {array: evenColours};
+
+    var highMenu = {array: highColours};
+    var lowMenu = {array: lowColours};
+    var smallMenu = {array: smallColours};
+    var mediumMenu = {array: mediumColours};
+    var largeMenu = {array: largeColours};
+
+    var sameMenu = {array: sameColours};
+    var friendlyMenu = {array: friendlyColours};
      
     digits.forEach(digit => {
         if(Framework.app.tool == 'colour'){
             contextMenu[digit.title] = CtxMenu(digit);
-            oddMenu[digit.title] = contextMenu[digit.title].addItem("  Odd", function() {
-                var oddIndex = oddColours.indexOf(digit.title);
-                var evenIndex = evenColours.indexOf(digit.title);
-                if(oddIndex > -1) {
-                    oddColours.splice(oddIndex, 1);
-                    oddMenu[digit.title].textContent = "  Odd";
-                } else {
-                    oddColours.push(digit.title);
-                    oddMenu[digit.title].textContent = "X Odd";
-                    if(evenIndex > -1) {
-                        evenColours.splice(evenIndex, 1);
-                        evenMenu[digit.title].textContent = "  Even";
-                    }
-                }  
-                main();  
-            });
 
-            evenMenu[digit.title] = contextMenu[digit.title].addItem("  Even", function() {
-                var oddIndex = oddColours.indexOf(digit.title);
-                var evenIndex = evenColours.indexOf(digit.title);
+            addMenuItem(digit, contextMenu, "Odd", oddMenu, [evenMenu]);
+            addMenuItem(digit, contextMenu, "Even", evenMenu, [oddMenu]);
+            contextMenu[digit.title].addSeparator();
 
-                if(evenIndex > -1) {
-                    evenColours.splice(evenIndex, 1);
-                    evenMenu[digit.title].textContent = "  Even";
-                } else {
-                    evenColours.push(digit.title);
-                    evenMenu[digit.title].textContent = "X Even";
-                    if(oddIndex > -1) {
-                        oddColours.splice(oddIndex, 1);
-                        oddMenu[digit.title].textContent = "  Odd";
-                    }
-                } 
-                main();   
-            });
+            addMenuItem(digit, contextMenu, "Low (1,2,3,4)", lowMenu, [highMenu, smallMenu, mediumMenu, largeMenu]);
+            addMenuItem(digit, contextMenu, "High (6,7,8,9)", highMenu, [lowMenu, smallMenu, mediumMenu, largeMenu]);
+            addMenuItem(digit, contextMenu, "Small (1,2,3)", smallMenu, [highMenu, lowMenu, mediumMenu, largeMenu]);
+            addMenuItem(digit, contextMenu, "Medium (4,5,6)", mediumMenu, [highMenu, lowMenu, smallMenu, largeMenu]);
+            addMenuItem(digit, contextMenu, "Large (7,8,9)", largeMenu, [highMenu, lowMenu, smallMenu, mediumMenu]);
+            contextMenu[digit.title].addSeparator();
 
-            highMenu[digit.title] = contextMenu[digit.title].addItem("  High", function() {
-                var highIndex = highColours.indexOf(digit.title);
-                var evenIndex = evenColours.indexOf(digit.title);
-                if(highIndex > -1) {
-                    highColours.splice(highIndex, 1);
-                    highMenu[digit.title].textContent = "  High";
-                } else {
-                    highColours.push(digit.title);
-                    highMenu[digit.title].textContent = "X High";
-                    if(evenIndex > -1) {
-                        evenColours.splice(evenIndex, 1);
-                        evenMenu[digit.title].textContent = "  Even";
-                    }
-                }  
-                main();  
-            });
+            addMenuItem(digit, contextMenu, "Same", sameMenu);
+            contextMenu[digit.title].addSeparator();
 
-            lowMenu[digit.title] = contextMenu[digit.title].addItem("  Low", function() {
-                var highIndex = highColours.indexOf(digit.title);
-                var lowIndex = lowColours.indexOf(digit.title);
-
-                if(lowIndex > -1) {
-                    lowColours.splice(lowIndex, 1);
-                    lowMenu[digit.title].textContent = "  Low";
-                } else {
-                    lowColours.push(digit.title);
-                    lowMenu[digit.title].textContent = "X Low";
-                    if(highIndex > -1) {
-                        highColours.splice(highIndex, 1);
-                        highMenu[digit.title].textContent = "  High";
-                    }
-                } 
-                main();   
-            });
-
-            sameMenu[digit.title] = contextMenu[digit.title].addItem("  Same", function() {
-                var sameIndex = sameColours.indexOf(digit.title);
-                if(sameIndex > -1) {
-                    sameColours.splice(sameIndex, 1);
-                    sameMenu[digit.title].textContent = "  Same";
-                } else {
-                    sameColours.push(digit.title);
-                    sameMenu[digit.title].textContent = "X Same";
-                } 
-                main();   
-            });
-
-            friendlyMenu[digit.title] = contextMenu[digit.title].addItem("  Friendly", function() {
-                var friendlyIndex = friendlyColours.indexOf(digit.title);
-                if(friendlyIndex > -1) {
-                    friendlyColours.splice(friendlyIndex, 1);
-                    friendlyMenu[digit.title].textContent = "  Friendly";
-                } else {
-                    friendlyColours.push(digit.title);
-                    friendlyMenu[digit.title].textContent = "X Friendly";
-                } 
-                main();   
-            });
+            addMenuItem(digit, contextMenu, "Friendly", friendlyMenu);
         } else {
             ctxMenuManager._ctxMenus.delete(digit);
         }
     });
+}
+
+function addMenuItem(digit, contextMenu, title, menu, menusRemove = []) {
+    var menuItem = contextMenu[digit.title].addItem("  " + title, function() {
+        var addIndex = menu.array.indexOf(digit.title);
+        if(addIndex > -1) {
+            menu.array.splice(addIndex, 1);
+            menuItem.textContent = "  " + title;
+        } else {
+            menu.array.push(digit.title);
+            menuItem.textContent = "X " + title;
+            menusRemove.forEach(removeMenu => {
+                    var removeIndex = removeMenu.array.indexOf(digit.title);
+                    removeMenu.array.splice(removeIndex, 1);
+                    removeMenu[digit.title].textContent = removeMenu[digit.title].textContent.replace("X ", "  ");
+                });
+            }
+        main();   
+    });
+    menuItem;
 }
 
 function addListener() {  
@@ -372,7 +323,20 @@ function autoColour(cell, useCandidates) {
     }
 
     if(values.length > 0) {
-        if(values.every(value => value > 5)) {
+        if(values.every(value => value <= 4)) {
+            lowColours.forEach(colour => {
+                if(!cell.propContains('colour', colour)) {
+                    cell.propSet('colour', colour);
+                }
+            });
+            highColours.forEach(colour => {
+                if(cell.propContains('colour', colour)) {
+                    cell.propUnset('colour', colour);
+                }
+            });
+        }
+
+        if(values.every(value => value >= 6)) {
             highColours.forEach(colour => {
                 if(!cell.propContains('colour', colour)) {
                     cell.propSet('colour', colour);
@@ -384,17 +348,62 @@ function autoColour(cell, useCandidates) {
                 }
             });
         }
-        if(values.every(value => value < 5)) {
-            lowColours.forEach(colour => {
+
+        if(values.every(value => value <= 3)) {
+            smallColours.forEach(colour => {
                 if(!cell.propContains('colour', colour)) {
                     cell.propSet('colour', colour);
                 }
             });
-            highColours.forEach(colour => {
+
+            mediumColours.forEach(colour => {
                 if(cell.propContains('colour', colour)) {
                     cell.propUnset('colour', colour);
                 }
             });
+            largeColours.forEach(colour => {
+                if(cell.propContains('colour', colour)) {
+                    cell.propUnset('colour', colour);
+                }
+            });
+        }
+
+        if(values.every(value => value >= 4 && value <= 6)) {
+            mediumColours.forEach(colour => {
+                if(!cell.propContains('colour', colour)) {
+                    cell.propSet('colour', colour);
+                }
+            });
+
+            smallColours.forEach(colour => {
+                if(cell.propContains('colour', colour)) {
+                    cell.propUnset('colour', colour);
+                }
+            });
+            largeColours.forEach(colour => {
+                if(cell.propContains('colour', colour)) {
+                    cell.propUnset('colour', colour);
+                }
+            });
+        }
+
+        if(values.every(value => value >= 7)) {
+            largeColours.forEach(colour => {
+                if(!cell.propContains('colour', colour)) {
+                    cell.propSet('colour', colour);
+                }
+            });
+
+            smallColours.forEach(colour => {
+                if(cell.propContains('colour', colour)) {
+                    cell.propUnset('colour', colour);
+                }
+            });
+            mediumColours.forEach(colour => {
+                if(cell.propContains('colour', colour)) {
+                    cell.propUnset('colour', colour);
+                }
+            });  
         }
     }
 }
@@ -412,14 +421,32 @@ function autoErase(cell, useCandidates) {
         })
     }
 
+    if(lowColours.some(colour => cell.colours.includes(colour))) {
+        cell.candidates.concat(cell.givenCentremarks).filter(candidate => parseInt(candidate) > 4).forEach(candidate => {
+            eraseCell(cell, candidate, log);
+        })
+    }
+
     if(highColours.some(colour => cell.colours.includes(colour))) {
-        cell.candidates.concat(cell.givenCentremarks).filter(candidate => parseInt(candidate) <= 5).forEach(candidate => {
+        cell.candidates.concat(cell.givenCentremarks).filter(candidate => parseInt(candidate) < 6).forEach(candidate => {
             eraseCell(cell, candidate);
         })
     }
 
-    if(lowColours.some(colour => cell.colours.includes(colour))) {
-        cell.candidates.concat(cell.givenCentremarks).filter(candidate => parseInt(candidate) >= 5).forEach(candidate => {
+    if(smallColours.some(colour => cell.colours.includes(colour))) {
+        cell.candidates.concat(cell.givenCentremarks).filter(candidate => parseInt(candidate) > 3).forEach(candidate => {
+            eraseCell(cell, candidate, log);
+        })
+    }
+
+    if(mediumColours.some(colour => cell.colours.includes(colour))) {
+        cell.candidates.concat(cell.givenCentremarks).filter(candidate => parseInt(candidate) < 4 || parseInt(candidate) > 6).forEach(candidate => {
+            eraseCell(cell, candidate, log);
+        })
+    }
+    
+    if(largeColours.some(colour => cell.colours.includes(colour))) {
+        cell.candidates.concat(cell.givenCentremarks).filter(candidate => parseInt(candidate) < 7).forEach(candidate => {
             eraseCell(cell, candidate, log);
         })
     }
