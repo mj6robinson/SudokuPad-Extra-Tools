@@ -246,13 +246,15 @@ function addMenuItem(digit, contextMenu, title, menu, menusRemove = []) {
             menuItem.textContent = "X " + title;
             menusRemove.forEach(removeMenu => {
                     var removeIndex = removeMenu.array.indexOf(digit.title);
-                    removeMenu.array.splice(removeIndex, 1);
-                    removeMenu[digit.title].textContent = removeMenu[digit.title].textContent.replace("X ", "  ");
+                    if(removeIndex > -1) {
+                        removeMenu.array.splice(removeIndex, 1);
+                        removeMenu[digit.title].textContent = removeMenu[digit.title].textContent.replace("X ", "  ");
+                    }
                 });
             }
         main();   
     });
-    menuItem;
+    menu[digit.title] = menuItem;
 }
 
 function addListener() {  
@@ -423,7 +425,7 @@ function autoErase(cell, useCandidates) {
 
     if(lowColours.some(colour => cell.colours.includes(colour))) {
         cell.candidates.concat(cell.givenCentremarks).filter(candidate => parseInt(candidate) > 4).forEach(candidate => {
-            eraseCell(cell, candidate, log);
+            eraseCell(cell, candidate);
         })
     }
 
@@ -435,19 +437,19 @@ function autoErase(cell, useCandidates) {
 
     if(smallColours.some(colour => cell.colours.includes(colour))) {
         cell.candidates.concat(cell.givenCentremarks).filter(candidate => parseInt(candidate) > 3).forEach(candidate => {
-            eraseCell(cell, candidate, log);
+            eraseCell(cell, candidate);
         })
     }
 
     if(mediumColours.some(colour => cell.colours.includes(colour))) {
         cell.candidates.concat(cell.givenCentremarks).filter(candidate => parseInt(candidate) < 4 || parseInt(candidate) > 6).forEach(candidate => {
-            eraseCell(cell, candidate, log);
+            eraseCell(cell, candidate);
         })
     }
     
     if(largeColours.some(colour => cell.colours.includes(colour))) {
         cell.candidates.concat(cell.givenCentremarks).filter(candidate => parseInt(candidate) < 7).forEach(candidate => {
-            eraseCell(cell, candidate, log);
+            eraseCell(cell, candidate);
         })
     }
 
@@ -458,7 +460,7 @@ function autoErase(cell, useCandidates) {
 
             return val != cell.row + 1 && val != cell.col + 1 && val != box;
         }).forEach(candidate => {
-            eraseCell(cell, candidate, log);
+            eraseCell(cell, candidate);
         })
     }
 
