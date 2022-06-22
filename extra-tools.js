@@ -285,6 +285,7 @@ function main() {
         autoEraseThermos();
         autoEraseArrows();
         autoEraseGermanWhisper();
+        autoEraseRenban();
     }
 }
 
@@ -732,6 +733,68 @@ function autoEraseGermanWhisper(targetCell, useCandidates) {
     });
 }
 
+function autoEraseRenban(targetCell, useCandidates) {
+    Framework.app.sourcePuzzle.lines?.filter(line => {
+        var rgb = hexToRGBA(line.color);
+        return rgb[1] < 150 && rgb[0] > 220 && rgb[2] > 220;
+    }).forEach(line => {
+        var lineCells = [];
+        var row = null, col = null;
+        line.wayPoints.forEach((point) => {
+            while(row != Math.floor(point[0]) || col != Math.floor(point[1])) {
+                row += row === null ? Math.floor(point[0]) : Math.sign(Math.floor(point[0]) - row);
+                col += col === null ? Math.floor(point[1]) : Math.sign(Math.floor(point[1]) - col);
+                lineCells.push(Framework.app.grid.getCell(row, col));
+            }        
+        });
+
+        if(!targetCell || lineCells.includes(targetCell)) {
+            var lineMin = 1;
+            var lineMax = 9;
+            var givens = [];
+            var group = findGroup(lineCells) || [];
+            group = group.map(value => parseInt(value));
+
+            lineCells.forEach(lineCell => {
+                var min = 1;
+                var max = 9;
+
+                if(useCandidates && lineCell.candidates.concat(lineCell.givenCentremarks).length > 0) {
+                    min = Math.min.apply(null, lineCell.candidates.concat(lineCell.givenCentremarks).map(candidate => parseInt(candidate)).filter(candidate => candidate > min)) - 1;
+                    max = Math.max.apply(null, lineCell.candidates.concat(lineCell.givenCentremarks).map(candidate => parseInt(candidate)));    
+                }  
+                min = parseInt(lineCell.given || lineCell.value || min);
+                max = parseInt(lineCell.given || lineCell.value || max);
+
+                if(lineCell.given || lineCell.value) {
+                    givens.push(lineCell.given || lineCell.value);
+                }
+
+                lineMin = Math.max(lineMin, min - lineCells.length + 1);
+                lineMax = Math.min(lineMax, max + lineCells.length - 1);
+            });
+
+            if(givens.length > 0 || group.length > 0) {
+                lineMin = Math.max(lineMin, Math.max.apply(null, givens.concat(group)) - lineCells.length + 1);
+                lineMax = Math.min(lineMax, Math.min.apply(null, givens.concat(group)) + lineCells.length - 1);
+            }
+
+            lineCells.filter(c => !c.given && !c.value).forEach(c => {
+                group = findGroup(lineCells.filter(cell => c != cell)) || [];
+                group = group.map(value => parseInt(value));
+                if(!targetCell || targetCell == c) {
+                    var values = c.candidates.concat(c.givenCentremarks).map(candidate => parseInt(candidate));
+                    values.forEach(value => { 
+                        if(value < lineMin || value > lineMax || givens.includes(value) || group.includes(value) ) {
+                            eraseCell(c, value.toString());
+                        }
+                    });
+                }
+            });
+        }
+    });
+}
+
 function autoEraseThermos(targetCell, useCandidates) {
     var thermos = Framework.app.currentPuzzle.thermos.filter(thermo => isThermo(thermo)).reduce((thermos, thermo) => {
         if(!thermos[thermo.line.wayPoints])
@@ -743,7 +806,7 @@ function autoEraseThermos(targetCell, useCandidates) {
                 while(row != Math.floor(point[0]) || col != Math.floor(point[1])) {
                     var max = 9;
                     row += row === null ? Math.floor(point[0]) : Math.sign(Math.floor(point[0]) - row);
-                    col += col === null ? Math.floor(point[1]) :Math.sign(Math.floor(point[1]) - col);
+                    col += col === null ? Math.floor(point[1]) : Math.sign(Math.floor(point[1]) - col);
                     var cell = Framework.app.grid.getCell(row, col);
                     if(cell == targetCell) {
                         thermos[thermo.line.wayPoints].hasTarget = true;
@@ -989,6 +1052,7 @@ function pencilMark(fill = true) {
         autoEraseCages(cell, true);
         autoEraseArrows(cell, true);
         autoEraseGermanWhisper(cell, true);
+        autoEraseRenban(cell, true);
         autoEraseSame(cell, null, true);
         
         autoErase(cell, true);

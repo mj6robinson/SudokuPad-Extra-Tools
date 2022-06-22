@@ -276,17 +276,21 @@ function CtxMenu(element){
 		element = document;
 	}
 
-	element.addEventListener('touchend', function(){
-		clearTimeout(this.pressTimer);
+	const pressTimer = null;
+
+	element.addEventListener('touchend', function() {
+		if(pressTimer) {
+			clearTimeout(pressTimer);
+		}
 		// Clear timeout
 		return false;
 	});
 
 	var rect = element.getBoundingClientRect();
 	  
-	element.addEventListener('touchstart', function(){
+	element.addEventListener('touchstart', function() {
 		// Set timeout
-		this.pressTimer = window.setTimeout(function() { 
+		pressTimer = window.setTimeout(function() { 
 			var e = element.ownerDocument.createEvent('MouseEvents');
 			e.initMouseEvent('contextmenu', true, true, element.ownerDocument.defaultView, 1, rect.right, rect.top, rect.left, rect.bottom, false,false, false, false, 2, null);
 			return !element.dispatchEvent(e); 
