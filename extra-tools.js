@@ -1,8 +1,5 @@
+var working = false;
 var autoEraserOn = false;
-var knightMove = false;
-var kingMove = false;
-var uniqueBox = false;
-var nonconsecutive = false;
 
 var valuesDiv = null;
 
@@ -25,6 +22,7 @@ setup();
 
 function setup(){
     if(typeof Framework === 'function' && typeof Framework.app === 'object') {
+        addSettings();
         addPencilFillButton();
         addAutoEraserButton();
         addValuesDisplay();
@@ -33,6 +31,36 @@ function setup(){
     } else {
         setTimeout(setup, 100);
     } 
+}
+
+function addSettings() {
+    Framework.addSettings([
+        {tag: 'toggle', group: 'Extra Tools', name: 'auto-fill', content: 'Auto Fill'},
+
+        {tag: 'toggle', group: 'Extra Tools', name: 'knight-move', content: 'Knight Move'},
+        {tag: 'toggle', group: 'Extra Tools', name: 'king-move', content: 'King Move'},
+        {tag: 'toggle', group: 'Extra Tools', name: 'unique-box', content: 'Unique Box'},
+        {tag: 'toggle', group: 'Extra Tools', name: 'nonconsecutive', content: 'Nonconsecutive'},
+        
+        {tag: 'toggle', group: 'Extra Tools', name: 'cages', content: 'Cages'},
+		{tag: 'toggle', group: 'Extra Tools', name: 'kropkis', content: 'Kropkis Dots'},
+        {tag: 'toggle', group: 'Extra Tools', name: 'xvs', content: 'X/V'},
+        {tag: 'toggle', group: 'Extra Tools', name: 'inequality', content: 'Inequality'},
+        {tag: 'toggle', group: 'Extra Tools', name: 'thermos', content: 'Thermos'},
+        {tag: 'toggle', group: 'Extra Tools', name: 'arrows', content: 'Arrows'},
+        {tag: 'toggle', group: 'Extra Tools', name: 'german-whisper', content: 'German Whisper Lines'},
+        {tag: 'toggle', group: 'Extra Tools', name: 'renban', content: 'Renban Lines'},
+	]);
+
+    Framework.settings['auto-fill'] = true;
+    Framework.settings['cages'] = true;
+    Framework.settings['kropkis'] = true;
+    Framework.settings['xvs'] = true;
+    Framework.settings['inequality'] = true;
+    Framework.settings['thermos'] = true;
+    Framework.settings['arrows'] = true;
+    Framework.settings['german-whisper'] = true;
+    Framework.settings['renban'] = true;
 }
 
 function addPencilFillButton() {
@@ -46,59 +74,13 @@ function addPencilFillButton() {
 }
 
 function addAutoEraserButton() {    
-    if(typeof CtxMenu != 'undefined') {
-        Framework.addToolButtons([{
-            name: 'auto-eraser', title: 'Auto Eraser',
-            content: `<div class="icon"><svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 0 24 24" fill="currentColor"><path d="M 13.086 6.207 a 2 2 0 0 1 2.828 0 l 3.879 3.879 a 2 2 0 0 1 0 2.828 l -5.5 5.5 A 2 2 0 0 1 12.879 19 H 10.12 a 2 2 0 0 1 -1.414 -0.586 l -2.5 -2.5 a 2 2 0 0 1 0 -2.828 l 6.879 -6.879 z m 0.66 11.34 L 8.453 12.254 L 6.914 13.793 a 1 1 0 0 0 0 1.414 l 2.5 2.5 a 1 1 0 0 0 0.707 0.293 H 12.88 a 1 1 0 0 0 0.707 -0.293 l 0.16 -0.16 z"/></svg></div>`,
-        }]);
-        Framework.app.refreshControls();
+    Framework.addToolButtons([{
+        name: 'auto-eraser', title: 'Auto Eraser',
+        content: `<div class="icon"><svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 0 24 24" fill="currentColor"><path d="M 13.086 6.207 a 2 2 0 0 1 2.828 0 l 3.879 3.879 a 2 2 0 0 1 0 2.828 l -5.5 5.5 A 2 2 0 0 1 12.879 19 H 10.12 a 2 2 0 0 1 -1.414 -0.586 l -2.5 -2.5 a 2 2 0 0 1 0 -2.828 l 6.879 -6.879 z m 0.66 11.34 L 8.453 12.254 L 6.914 13.793 a 1 1 0 0 0 0 1.414 l 2.5 2.5 a 1 1 0 0 0 0.707 0.293 H 12.88 a 1 1 0 0 0 0.707 -0.293 l 0.16 -0.16 z"/></svg></div>`,
+    }]);
+    Framework.app.refreshControls();
 
-        addDownEventHandler('#control-auto-eraser', autoEraserToggle, {passive: false});
-        //addHandler('#control-auto-eraser', 'mousedown.LongTouch', fn, opts);
-        
-        var contextMenu = CtxMenu(document.querySelector('#control-auto-eraser'));
-        var knightMoveItem = contextMenu.addItem("  Knight Move", function() {
-            knightMove = !knightMove;
-            if(knightMove) {
-                knightMoveItem.textContent = "X Knight Move";
-            } else {
-                knightMoveItem.textContent = "  Knight Move";   
-            }
-
-        });
-
-        var kingMoveItem = contextMenu.addItem("  King Move", function() {
-            kingMove = !kingMove;
-            if(kingMove) {
-                kingMoveItem.textContent = "X King Move";
-            } else {
-                kingMoveItem.textContent = "  King Move";   
-            }
-
-        });
-
-        var uniqueBoxItem = contextMenu.addItem("  Unique Box", function() {
-            uniqueBox = !uniqueBox;
-            if(uniqueBox) {
-                uniqueBoxItem.textContent = "X Unique Box";
-            } else {
-                uniqueBoxItem.textContent = "  Unique Box";   
-            }
-
-        });
-
-        var nonconsecutiveItem = contextMenu.addItem("  Nonconsecutive", function() {
-            nonconsecutive = !nonconsecutive;
-            if(nonconsecutive) {
-                nonconsecutiveItem.textContent = "X Nonconsecutive";
-            } else {
-                nonconsecutiveItem.textContent = "  Nonconsecutive";   
-            }
-
-        });
-    } else {
-        setTimeout(addAutoEraserButton, 500);
-    }
+    addDownEventHandler('#control-auto-eraser', autoEraserToggle, {passive: false});
 }
 
 function autoEraserToggle() {
@@ -136,51 +118,6 @@ function dobuleClickSetup() {
                     Framework.app.puzzle.select(Framework.app.puzzle.cells.filter(c => ((!c.given && !c.value) || Framework.app.tool == 'normal' || Framework.app.tool == 'colour') && c.propContains(Framework.app.tool, digit.title)));
                 }
             })
-        });
-
-        Framework.app.addEventListener('tool-handleToolButton', function(digit) {
-            if(Framework.app.puzzle.selectedCells.length > 0) {
-                if(Framework.app.tool == 'colour') {
-                    if(sameColours.some(colour => colour == digit)) {
-                        if(!Framework.app.puzzle.selectedCells.every(cell => cell.colours.includes(digit))) {
-                            var values = Framework.app.puzzle.cells.filter(cell => cell.colours.includes(digit) || Framework.app.puzzle.selectedCells.includes(cell)).filter(c => c.candidates.concat(c.givenCentremarks).length > 0).map(c => c.candidates.concat(c.givenCentremarks)).reduce((a, b) => a.filter(c => b.includes(c)), ['1', '2', '3', '4', '5', '6', '7', '8', '9']);
-                            for(var val = 1; val <= 9; val++) {
-                                var value = val.toString();
-                                Framework.app.puzzle.selectedCells.forEach(cell => {
-                                    if(values.includes(val.toString())) {
-                                        if(!cell.propContains('centre', value)) {
-                                            cell.propSet('centre', value);
-                                        }
-                                    } else {
-                                        if(cell.propContains('centre', value)) {
-                                            cell.propUnset('centre', value);
-                                        }
-                                    }
-                                });
-                            }
-                        }
-                    } 
-                }
-                else if(Framework.app.tool == 'centre') {
-                    sameColours.forEach(colour => {
-                        var cells = Framework.app.puzzle.selectedCells.filter(cell => cell.colours.includes(colour));
-                        if(cells.length > 0) {
-                            var remove = cells.every(cell => cell.candidates.concat(cell.givenCentremarks).includes(digit));
-                            Framework.app.puzzle.cells.filter(cell => cell.colours.includes(colour) && !cells.includes(cell)).forEach(cell => {
-                                if(remove) {
-                                    if(cell.propContains('centre', digit)) {
-                                        cell.propUnset('centre', digit);
-                                    }
-                                } else {
-                                    if(!cell.propContains('centre', digit)) {
-                                        cell.propSet('centre', digit);
-                                    }
-                                }
-                            });
-                        }
-                    });
-                }
-            }
         });
 
         setupButtonMenus();
@@ -258,27 +195,80 @@ function addMenuItem(digit, contextMenu, title, menu, menusRemove = []) {
 }
 
 function addListener() {  
-    if(Framework && Framework.app.puzzle) {
-        Framework.app.addEventListener('act', function() {
-            main();
-        });
+    if(Framework && Framework.app) {
+        var handleToolButton = function(value) {
+            if(!working) {
+                if(this.name == 'normal' && Framework.app.puzzle.selectedCells.every(cell => cell.value == value)) {
+                    return false;
+                } else {
+                    main(this.name, value);
+                }
+                return true;
+            }
+        };
 
+        Framework.app.tools.centre["handleToolButton"] = handleToolButton;
+        Framework.app.tools.corner["handleToolButton"] = handleToolButton;
+        Framework.app.tools.colour["handleToolButton"] = handleToolButton;
+        Framework.app.tools.normal["handleToolButton"] = handleToolButton;
         Framework.app.puzzle.addEventListener('act', function() {
-            calculateValues();
+            if(!working) {
+                calculateValues();
+            }
         });
     } else {
         setTimeout(addListener, 500);
     }
 };
 
-function main() {
+function main(tool, value) {
+    working = true; 
+
+    var remove = tool && value && Framework.app.puzzle.selectedCells.every(cell => {
+        if(tool == 'centre') {
+            return cell.candidates.concat(cell.givenCentremarks).includes(value);
+        } else if(tool == 'corner') {
+            return cell.pencilmarks.concat(cell.givenCornermarks).includes(value);
+        } else if(tool == 'colour') {
+            return cell.colours.includes(value) || (value == 0 && cell.colours.length > 0);
+        }
+    });
     Framework.app.puzzle.cells.forEach(cell => {
-        autoColour(cell);
-        if(autoEraserOn && (cell.candidates.concat(cell.givenCentremarks).length > 0 || cell.pencilmarks.length > 0)) {
-            autoErase(cell, false, false);
+        if(cell.given || cell.value) {
+            cell.centres = [cell.given || cell.value];
+            cell.corners = [cell.given || cell.value];
+        } else {
+            cell.centres = cell.candidates.concat(cell.givenCentremarks);
+            cell.corners = cell.pencilmarks.concat(cell.givenCornermarks);
+        }
+        cell.colors = cell.colours.map(x => x);
+        cell.normal = cell.given || cell.value;
+        if(tool && value && Framework.app.puzzle.selectedCells.includes(cell)) {
+            if(tool == 'centre') {
+                remove ? removeFrom(cell.centres, value) : addTo(cell.centres, value);
+                sameColours.filter(sameColour => cell.colors.includes(sameColour)).forEach(sameColour => {
+                    var allCells = Framework.app.puzzle.cells.filter(c => c != cell && c.colours.includes(sameColour));        
+                    allCells.forEach(c => {
+                        remove ? removeFrom(c.centres, value) : addTo(c.centres, value);
+                    });
+                });
+            } else if(tool == 'corner') {
+                remove ? removeFrom(cell.corners, value) : addTo(cell.corners, value);
+            } else if(tool == 'normal') {
+                cell.normal = value;
+            } else if(tool == 'colour') {
+                if(value == 0) {
+                    cell.colors = [];
+                } else {
+                    remove ? removeFrom(cell.colors, value) : addTo(cell.colors, value);
+                }
+            }
         }
     });
     if (autoEraserOn) {
+        Framework.app.puzzle.cells.filter(cell => cell.centres.length > 0 || cell.corners.length > 0).forEach(cell => {
+            autoErase(cell, false, false);
+        });
         autoEraseKropkis();
         autoEraseXVS();
         autoEraseInequality();
@@ -287,175 +277,186 @@ function main() {
         autoEraseGermanWhisper();
         autoEraseRenban();
     }
+    if(tool && value && !remove && Framework.app.puzzle.selectedCells.every(cell => {
+        if(tool == 'centre') {
+            return (!cell.centres.includes(value) && !cell.candidates.concat(cell.givenCentremarks).includes(value)) ||
+                   (cell.centres.includes(value) && cell.candidates.concat(cell.givenCentremarks).includes(value));
+        } else if(tool == 'corner') {
+            return (!cell.corners.includes(value) && !cell.pencilmarks.concat(cell.givenCornermarks).includes(value)) ||
+                   (cell.corners.includes(value) && cell.pencilmarks.concat(cell.givenCornermarks).includes(value));
+        } else if(tool == 'colour') {
+            return (!cell.colours.includes(value) && !cell.colors.includes(value)) ||
+                   (cell.colours.includes(value) && cell.colors.includes(value));
+        }
+    })) {
+        Framework.app.puzzle.selectedCells.forEach(cell => {
+            if(tool == 'centre') {
+                removeFrom(cell.centres, value);
+            } else if(tool == 'corner') {
+                removeFrom(cell.corners, value);
+            } else if(tool == 'colour') {
+                if(value == 0) {
+                    cell.colors = [];
+                } else {
+                    removeFrom(cell.colors, value);
+                }
+            }
+        });
+    }
+    autoColour();
+    autoFill();
+    working = false;
+    calculateValues();
 }
 
-function autoColour(cell, useCandidates) {
-    var values = [];
-    var value = cell.given || cell.value; 
-    if(value) {
-        values = [parseInt(value)];
-    } else if(useCandidates && cell.candidates.concat(cell.givenCentremarks).length > 0) {
-        values = cell.candidates.concat(cell.givenCentremarks).map(candidate => parseInt(candidate));
-    }
-
-    if(values.length > 0) {
-        if(values.every(value => value % 2 != 0)) {
-            oddColours.forEach(colour => {
-                if(!cell.propContains('colour', colour)) {
-                    cell.propSet('colour', colour);
-                }
-            });
-            evenColours.forEach(colour => {
-                if(cell.propContains('colour', colour)) {
-                    cell.propUnset('colour', colour);
-                }
-            });
-        }
-        if(values.every(value => value % 2 == 0)) {
-            evenColours.forEach(colour => {
-                if(!cell.propContains('colour', colour)) {
-                    cell.propSet('colour', colour);
-                }
-            });
-            oddColours.forEach(colour => {
-                if(cell.propContains('colour', colour)) {
-                    cell.propUnset('colour', colour);
-                }
-            });
-        }
-    }
-
-    if(values.length > 0) {
-        if(values.every(value => value <= 4)) {
-            lowColours.forEach(colour => {
-                if(!cell.propContains('colour', colour)) {
-                    cell.propSet('colour', colour);
-                }
-            });
-            highColours.forEach(colour => {
-                if(cell.propContains('colour', colour)) {
-                    cell.propUnset('colour', colour);
-                }
-            });
+function autoColour(targetCell, useCandidates) {
+    Framework.app.puzzle.cells.filter(cell => !targetCell || cell == targetCell).forEach(cell => {
+        var values = [];
+        var value = cell.given || cell.value || cell.normal; 
+        if(value) {
+            values = [parseInt(value)];
+        } else if(useCandidates && cell.centres.length > 0) {
+            values = cell.centres.map(candidate => parseInt(candidate));
         }
 
-        if(values.every(value => value >= 6)) {
-            highColours.forEach(colour => {
-                if(!cell.propContains('colour', colour)) {
-                    cell.propSet('colour', colour);
-                }
-            });
-            lowColours.forEach(colour => {
-                if(cell.propContains('colour', colour)) {
-                    cell.propUnset('colour', colour);
-                }
-            });
+        sameColours.filter(sameColour => cell.colors.includes(sameColour)).forEach(sameColour => {
+            var allCells = Framework.app.puzzle.cells.filter(c => c.colours.includes(sameColour));
+            var arrays = allCells.filter(c => c.given || c.value || c.normal || c.centres.length > 0).map(c => c.given || c.value || c.normal ? [c.given || c.value || c.normal] : c.centres);
+            if(arrays.length > 0) {
+                var centres = arrays.shift().filter(function(v) {
+                    return arrays.every(function(a) {
+                        return a.indexOf(v) !== -1; 
+                    });
+                });            
+                allCells.forEach(c => {
+                    c.centres = centres;
+                });
+            }
+        });
+
+        if(values.length > 0) {
+            if(values.every(value => value % 2 != 0)) {
+                oddColours.forEach(colour => {
+                    addTo(cell.colors, colour);
+                });
+                evenColours.forEach(colour => {
+                    removeFrom(cell.colors, colour);
+                });
+            }
+            if(values.every(value => value % 2 == 0)) {
+                evenColours.forEach(colour => {
+                    addTo(cell.colors, colour);
+                });
+                oddColours.forEach(colour => {
+                    removeFrom(cell.colors, colour);
+                });
+            }
+
+            if(values.every(value => value <= 4)) {
+                lowColours.forEach(colour => {
+                    addTo(cell.colors, colour);
+                });
+                highColours.forEach(colour => {
+                    removeFrom(cell.colors, colour);
+                });
+            }
+
+            if(values.every(value => value >= 6)) {
+                highColours.forEach(colour => {
+                    addTo(cell.colors, colour);
+                });
+                lowColours.forEach(colour => {
+                    removeFrom(cell.colors, colour);
+                });
+            }
+
+            if(values.every(value => value <= 3)) {
+                smallColours.forEach(colour => {
+                    addTo(cell.colors, colour);
+                });
+
+                mediumColours.forEach(colour => {
+                    removeFrom(cell.colors, colour);
+                });
+                largeColours.forEach(colour => {
+                    removeFrom(cell.colors, colour);
+                });
+            }
+
+            if(values.every(value => value >= 4 && value <= 6)) {
+                mediumColours.forEach(colour => {
+                    addTo(cell.colors, colour);
+                });
+
+                smallColours.forEach(colour => {
+                    removeFrom(cell.colors, colour);
+                });
+                largeColours.forEach(colour => {
+                    removeFrom(cell.colors, colour);
+                });
+            }
+
+            if(values.every(value => value >= 7)) {
+                largeColours.forEach(colour => {
+                    addTo(cell.colors, colour);
+                });
+
+                smallColours.forEach(colour => {
+                    removeFrom(cell.colors, colour);
+                });
+                mediumColours.forEach(colour => {
+                    removeFrom(cell.colors, colour);
+                });  
+            }
         }
-
-        if(values.every(value => value <= 3)) {
-            smallColours.forEach(colour => {
-                if(!cell.propContains('colour', colour)) {
-                    cell.propSet('colour', colour);
-                }
-            });
-
-            mediumColours.forEach(colour => {
-                if(cell.propContains('colour', colour)) {
-                    cell.propUnset('colour', colour);
-                }
-            });
-            largeColours.forEach(colour => {
-                if(cell.propContains('colour', colour)) {
-                    cell.propUnset('colour', colour);
-                }
-            });
-        }
-
-        if(values.every(value => value >= 4 && value <= 6)) {
-            mediumColours.forEach(colour => {
-                if(!cell.propContains('colour', colour)) {
-                    cell.propSet('colour', colour);
-                }
-            });
-
-            smallColours.forEach(colour => {
-                if(cell.propContains('colour', colour)) {
-                    cell.propUnset('colour', colour);
-                }
-            });
-            largeColours.forEach(colour => {
-                if(cell.propContains('colour', colour)) {
-                    cell.propUnset('colour', colour);
-                }
-            });
-        }
-
-        if(values.every(value => value >= 7)) {
-            largeColours.forEach(colour => {
-                if(!cell.propContains('colour', colour)) {
-                    cell.propSet('colour', colour);
-                }
-            });
-
-            smallColours.forEach(colour => {
-                if(cell.propContains('colour', colour)) {
-                    cell.propUnset('colour', colour);
-                }
-            });
-            mediumColours.forEach(colour => {
-                if(cell.propContains('colour', colour)) {
-                    cell.propUnset('colour', colour);
-                }
-            });  
-        }
-    }
+    });
 }
 
 function autoErase(cell, useCandidates) {      
-    if(oddColours.some(colour => cell.colours.includes(colour))) {
-        cell.candidates.concat(cell.givenCentremarks).filter(candidate => parseInt(candidate) % 2 == 0).forEach(candidate => {
+    if(oddColours.some(colour => cell.colors.includes(colour))) {
+        cell.centres.filter(candidate => parseInt(candidate) % 2 == 0).forEach(candidate => {
             eraseCell(cell, candidate);
         })
     }
 
-    if(evenColours.some(colour => cell.colours.includes(colour))) {
-        cell.candidates.concat(cell.givenCentremarks).filter(candidate => parseInt(candidate) % 2 != 0).forEach(candidate => {
+    if(evenColours.some(colour => cell.colors.includes(colour))) {
+        cell.centres.filter(candidate => parseInt(candidate) % 2 != 0).forEach(candidate => {
             eraseCell(cell, candidate);
         })
     }
 
-    if(lowColours.some(colour => cell.colours.includes(colour))) {
-        cell.candidates.concat(cell.givenCentremarks).filter(candidate => parseInt(candidate) > 4).forEach(candidate => {
+    if(lowColours.some(colour => cell.colors.includes(colour))) {
+        cell.centres.filter(candidate => parseInt(candidate) > 4).forEach(candidate => {
             eraseCell(cell, candidate);
         })
     }
 
-    if(highColours.some(colour => cell.colours.includes(colour))) {
-        cell.candidates.concat(cell.givenCentremarks).filter(candidate => parseInt(candidate) < 6).forEach(candidate => {
+    if(highColours.some(colour => cell.colors.includes(colour))) {
+        cell.centres.filter(candidate => parseInt(candidate) < 6).forEach(candidate => {
             eraseCell(cell, candidate);
         })
     }
 
-    if(smallColours.some(colour => cell.colours.includes(colour))) {
-        cell.candidates.concat(cell.givenCentremarks).filter(candidate => parseInt(candidate) > 3).forEach(candidate => {
+    if(smallColours.some(colour => cell.colors.includes(colour))) {
+        cell.centres.filter(candidate => parseInt(candidate) > 3).forEach(candidate => {
             eraseCell(cell, candidate);
         })
     }
 
-    if(mediumColours.some(colour => cell.colours.includes(colour))) {
-        cell.candidates.concat(cell.givenCentremarks).filter(candidate => parseInt(candidate) < 4 || parseInt(candidate) > 6).forEach(candidate => {
+    if(mediumColours.some(colour => cell.colors.includes(colour))) {
+        cell.centres.filter(candidate => parseInt(candidate) < 4 || parseInt(candidate) > 6).forEach(candidate => {
             eraseCell(cell, candidate);
         })
     }
     
-    if(largeColours.some(colour => cell.colours.includes(colour))) {
-        cell.candidates.concat(cell.givenCentremarks).filter(candidate => parseInt(candidate) < 7).forEach(candidate => {
+    if(largeColours.some(colour => cell.colors.includes(colour))) {
+        cell.centres.filter(candidate => parseInt(candidate) < 7).forEach(candidate => {
             eraseCell(cell, candidate);
         })
     }
 
-    if(friendlyColours.some(colour => cell.colours.includes(colour))) {
-        cell.candidates.concat(cell.givenCentremarks).filter(candidate => {
+    if(friendlyColours.some(colour => cell.colors.includes(colour))) {
+        cell.centres.filter(candidate => {
             var val = parseInt(candidate);
             var box = (Math.floor(cell.row / 3) * 3) + Math.floor(cell.col / 3) + 1;
 
@@ -465,13 +466,13 @@ function autoErase(cell, useCandidates) {
         })
     }
 
-    Framework.app.currentPuzzle.cages.filter(cage => cage.unique != false).forEach(cage => {
-        var cageCells = getCageCells(cage);
+    Framework.app.currentPuzzle.cages.filter(cage => cage.unique != false && (Framework.settings['cages'] || cage.style != 'killer')).forEach(cage => {
+        var cageCells = Framework.app.puzzle.parseCells(cage.cells);
         if(cageCells.includes(cell)) {
-            cageCells.filter(c => c != cell && (c.given || c.value || c.candidates.concat(c.givenCentremarks).length == 1)).forEach(c => {
-                var value = c.given || c.value;
-                if(!value && useCandidates && c.candidates.concat(c.givenCentremarks).length == 1) {
-                    value = c.candidates.concat(c.givenCentremarks)[0];
+            cageCells.filter(c => c != cell && (c.given || c.value || c.normal || c.centres.length == 1)).forEach(c => {
+                var value = c.given || c.value || c.normal;
+                if(!value && useCandidates && c.centres.length == 1) {
+                    value = c.centres[0];
                 }
                 if(value) {
                     eraseCell(cell, value);
@@ -489,13 +490,13 @@ function autoErase(cell, useCandidates) {
         }
     });
 
-    if(knightMove) {
+    if(Framework.settings['knight-move']) {
         var offsets = [ {row: -2, col: -1}, {row: -2, col: 1}, 
                         {row: -1, col: -2}, {row: -1, col: 2}, 
                         {row:  1, col: -2}, {row:  1, col: 2}, 
                         {row:  2, col: -1}, {row:  2, col: 1}];
-        Framework.app.puzzle.cells.filter(c => c.given || c.value || useCandidates && c.candidates.concat(c.givenCentremarks).length == 1).forEach(c => {
-            var value = c.given || c.value || c.candidates.concat(c.givenCentremarks)[0];
+        Framework.app.puzzle.cells.filter(c => c.given || c.value|| c.normal || useCandidates && c.centres.length == 1).forEach(c => {
+            var value = c.given || c.value || c.normal || c.centres[0];
 
             offsets.forEach(offset => {
                 var row = c.row + offset.row;
@@ -507,13 +508,13 @@ function autoErase(cell, useCandidates) {
         });
     }
 
-    if(kingMove) {
+    if(Framework.settings['king-move']) {
         var offsets = [ {row: -1, col: -1}, 
                         {row: -1, col: 1}, 
                         {row:  1, col: -1}, 
                         {row:  1, col: 1} ];
-        Framework.app.puzzle.cells.filter(c => c.given || c.value || useCandidates && c.candidates.concat(c.givenCentremarks).length == 1).forEach(c => {
-            var value = c.given || c.value || c.candidates.concat(c.givenCentremarks)[0];
+        Framework.app.puzzle.cells.filter(c => c.given || c.value || c.normal || useCandidates && c.centres.length == 1).forEach(c => {
+            var value = c.given || c.value || c.normal || c.centres[0];
 
             offsets.forEach(offset => {
                 var row = c.row + offset.row;
@@ -525,12 +526,12 @@ function autoErase(cell, useCandidates) {
         });
     }
 
-    if(uniqueBox) {
+    if(Framework.settings['unique-box']) {
         var offsets = [ {row: 0, col: 0},  {row: 0, col: 3}, {row: 0, col: 6}, 
                         {row: 3, col: 0},  {row: 3, col: 3}, {row: 3, col: 6},
                         {row: 6, col: 0},  {row: 6, col: 3}, {row: 6, col: 6}];
-        Framework.app.puzzle.cells.filter(c => c.given || c.value || useCandidates && c.candidates.concat(c.givenCentremarks).length == 1).forEach(c => {
-            var value = c.given || c.value || c.candidates.concat(c.givenCentremarks)[0];
+        Framework.app.puzzle.cells.filter(c => c.given || c.value || c.normal || useCandidates && c.centres.length == 1).forEach(c => {
+            var value = c.given || c.value || c.normal || c.centres[0];
 
             offsets.forEach(offset => {
                 var row = c.row + offset.row;
@@ -546,11 +547,11 @@ function autoErase(cell, useCandidates) {
         });
     }
 
-    if(nonconsecutive) {
+    if(Framework.settings['nonconsecutive']) {
         var offsets = [ {row: -1, col: 0}, {row: 1, col: 0}, 
                         {row: 0, col: -1}, {row: 0, col: 1}];
-        Framework.app.puzzle.cells.filter(c => c.given || c.value || useCandidates && c.candidates.concat(c.givenCentremarks).length == 1).forEach(c => {
-            var value = parseInt(c.given || c.value || c.candidates.concat(c.givenCentremarks)[0]);
+        Framework.app.puzzle.cells.filter(c => c.given || c.value || c.normal || useCandidates && c.centres.length == 1).forEach(c => {
+            var value = parseInt(c.given || c.value || c.normal || c.centres[0]);
 
             offsets.forEach(offset => {
                 var row = c.row + offset.row;
@@ -579,7 +580,7 @@ function findGroup(cells) {
     }
     cellGroups =  cellGroups
         .filter(cellGroup => cellGroup.every(c => {
-            var length = c.candidates.concat(c.givenCentremarks).length;
+            var length = c.centres.length;
             return length > 0 && length <= cellGroup.length;
         }))
         .sort((a, b) => a.length - b.length);
@@ -587,7 +588,7 @@ function findGroup(cells) {
     var candidates = null;
     cellGroups.forEach(cellGroup => {   
         var testCandidates = [].concat.apply([], cellGroup.map(otherCell => {
-            var otherCandidates = otherCell.candidates.concat(otherCell.givenCentremarks)
+            var otherCandidates = otherCell.centres
             if(otherCandidates.length == 0) {
                 return Array.from(Array(9), (_, index) => (index + 1).toString());
             }
@@ -602,31 +603,9 @@ function findGroup(cells) {
     return candidates;
 }
 
-function autoEraseSame(targetCell, value, useCandidates) {
-    if(sameColours.some(colour => targetCell.colours.includes(colour))) {
-        sameColours.filter(colour => targetCell.colours.includes(colour)).forEach(colour => {
-            var otherCells = Framework.app.puzzle.cells.filter(c => c != targetCell && c.colours.includes(colour));
-            if(value) {
-                otherCells.forEach(cell => {
-                    eraseCell(cell, value, true);
-                });
-            } else {
-                var values = Array.from(Array(9), (_, index) => (index + 1).toString());
-                var valueCell = otherCells.find(c => c.given || c.value);
-                if(valueCell) {
-                    values = [valueCell.given || valueCell.value];
-                } else if(useCandidates && otherCells.some(c => c.candidates.concat(c.givenCentremarks).length > 0)) {
-                    values = otherCells.filter(c => c.candidates.concat(c.givenCentremarks).length > 0).map(c => c.candidates.concat(c.givenCentremarks)).reduce((a, b) => a.filter(c => b.includes(c)), ['1', '2', '3', '4', '5', '6', '7', '8', '9']);
-                }
-                targetCell.candidates.concat(targetCell.givenCentremarks).filter(candidate => !values.includes(candidate)).forEach(candidate => {
-                    eraseCell(targetCell, candidate);
-                });
-            }
-        });
-    }
-}
-
 function autoEraseArrows(targetCell, useCandidates) {
+    if(!Framework.settings['arrows']) return;
+
     Framework.app.sourcePuzzle.arrows?.filter(arrow => arrow.wayPoints?.length > 1).forEach(arrow => {
         var circleCell;
         var arrowCells = [];
@@ -645,21 +624,21 @@ function autoEraseArrows(targetCell, useCandidates) {
         });
         var circleValues = Array.from(Array(9), (_, index) => (index + 1));
         if(circleCell && arrowCells.length > 0) {
-            if(circleCell.given || circleCell.value || useCandidates) {
+            if(circleCell.given || circleCell.value || circleCell.normal || useCandidates) {
                 circleValues = getAllValues([circleCell], [], true);
             }
 
             if(!targetCell || arrowCells.includes(targetCell)) {
-                arrowCells.filter(c => !c.given && !c.value).forEach(c => {
+                arrowCells.filter(c => !c.given && !c.value && !c.normal).forEach(c => {
                     if(!targetCell || targetCell == c) {
                         var otherCells = arrowCells.filter(cell => cell != c);
-                        var values = c.candidates.concat(c.givenCentremarks).map(candidate => parseInt(candidate));
+                        var values = c.centres.map(candidate => parseInt(candidate));
                         
                         if(circleValues.length > 0) {
                             values.forEach(value => {
                                 if(otherCells.length > 0) {
                                     var otherVals = Array.from(Array(9), (_, index) => (index + 1));
-                                    if(otherCells.length > 0 && (otherCells.every(c => c.given || c.value) || useCandidates)) {
+                                    if(otherCells.length > 0 && (otherCells.every(c => c.given || c.value || c.normal) || useCandidates)) {
                                         otherVals = calculateValuesInner(arrowCells, c, value, true);
                                         if(otherVals.every(val => !circleValues.includes(val))) {
                                             eraseCell(c, value.toString());
@@ -675,9 +654,9 @@ function autoEraseArrows(targetCell, useCandidates) {
             }
 
             if(!targetCell || targetCell == circleCell) {
-                var values = circleCell.candidates.concat(circleCell.givenCentremarks).map(candidate => parseInt(candidate));
+                var values = circleCell.centres.map(candidate => parseInt(candidate));
                 var arrowVals = [];
-                if(arrowCells.every(c => c.given || c.value) || useCandidates) {
+                if(arrowCells.every(c => c.given || c.value || c.normal) || useCandidates) {
                     arrowVals = calculateValuesInner(arrowCells, null, null, true);
                 }
                 if(arrowVals.length > 0) {
@@ -693,6 +672,8 @@ function autoEraseArrows(targetCell, useCandidates) {
 }
 
 function autoEraseGermanWhisper(targetCell, useCandidates) {
+    if(!Framework.settings['german-whisper']) return;
+
     Framework.app.sourcePuzzle.lines?.filter(line => {
         var rgb = hexToRGBA(line.color);
         return rgb[1] - rgb[0] - rgb[2] > 0;
@@ -708,19 +689,19 @@ function autoEraseGermanWhisper(targetCell, useCandidates) {
         });
 
         if(!targetCell || lineCells.includes(targetCell)) {
-            lineCells.filter(c => !c.given && !c.value).forEach(c => {
+            lineCells.filter(c => !c.given && !c.value && !c.normal).forEach(c => {
                 if(!targetCell || targetCell == c) {
                     var index = lineCells.indexOf(c);
                     var otherCells = lineCells.slice(Math.max(0, index - 1), index + 2).filter(cell => c != cell);
-                    var values = c.candidates.concat(c.givenCentremarks).map(candidate => parseInt(candidate));
+                    var values = c.centres.map(candidate => parseInt(candidate));
                     values.forEach(value => {
                         otherCells.forEach(otherCell => {
                             var otherVals = Array.from(Array(9), (_, index) => (index + 1).toString());
-                            var otherValue = parseInt(otherCell.given || otherCell.value);
+                            var otherValue = parseInt(otherCell.given || otherCell.value || otherCell.normal);
                             if(otherValue) {
                                 otherVals = [otherValue];
-                            } else if(useCandidates && otherCell.candidates.concat(otherCell.givenCentremarks).length > 0) {
-                                otherVals = otherCell.candidates.concat(otherCell.givenCentremarks).map(candidate => parseInt(candidate));
+                            } else if(useCandidates && otherCell.centres.length > 0) {
+                                otherVals = otherCell.centres.map(candidate => parseInt(candidate));
                             }
                             if(otherVals.length > 0 && otherVals.every(v => Math.abs(value - v) < 5 )) {
                                 eraseCell(c, value.toString());
@@ -734,6 +715,8 @@ function autoEraseGermanWhisper(targetCell, useCandidates) {
 }
 
 function autoEraseRenban(targetCell, useCandidates) {
+    if(!Framework.settings['renban']) return;
+
     Framework.app.sourcePuzzle.lines?.filter(line => {
         var rgb = hexToRGBA(line.color);
         return rgb[1] < 150 && rgb[0] > 220 && rgb[2] > 220;
@@ -759,15 +742,15 @@ function autoEraseRenban(targetCell, useCandidates) {
                 var min = 1;
                 var max = 9;
 
-                if(useCandidates && lineCell.candidates.concat(lineCell.givenCentremarks).length > 0) {
-                    min = Math.min.apply(null, lineCell.candidates.concat(lineCell.givenCentremarks).map(candidate => parseInt(candidate)).filter(candidate => candidate > min)) - 1;
-                    max = Math.max.apply(null, lineCell.candidates.concat(lineCell.givenCentremarks).map(candidate => parseInt(candidate)));    
+                if(useCandidates && lineCell.centres.length > 0) {
+                    min = Math.min.apply(null, lineCell.centres.map(candidate => parseInt(candidate)).filter(candidate => candidate > min)) - 1;
+                    max = Math.max.apply(null, lineCell.centres.map(candidate => parseInt(candidate)));    
                 }  
-                min = parseInt(lineCell.given || lineCell.value || min);
-                max = parseInt(lineCell.given || lineCell.value || max);
+                min = parseInt(lineCell.given || lineCell.value || lineCell.normal || min);
+                max = parseInt(lineCell.given || lineCell.value || lineCell.normal || max);
 
                 if(lineCell.given || lineCell.value) {
-                    givens.push(lineCell.given || lineCell.value);
+                    givens.push(lineCell.given || lineCell.value || lineCell.normal);
                 }
 
                 lineMin = Math.max(lineMin, min - lineCells.length + 1);
@@ -779,11 +762,11 @@ function autoEraseRenban(targetCell, useCandidates) {
                 lineMax = Math.min(lineMax, Math.min.apply(null, givens.concat(group)) + lineCells.length - 1);
             }
 
-            lineCells.filter(c => !c.given && !c.value).forEach(c => {
+            lineCells.filter(c => !c.given && !c.value && !c.normal).forEach(c => {
                 group = findGroup(lineCells.filter(cell => c != cell)) || [];
                 group = group.map(value => parseInt(value));
                 if(!targetCell || targetCell == c) {
-                    var values = c.candidates.concat(c.givenCentremarks).map(candidate => parseInt(candidate));
+                    var values = c.centres.map(candidate => parseInt(candidate));
                     values.forEach(value => { 
                         if(value < lineMin || value > lineMax || givens.includes(value) || group.includes(value) ) {
                             eraseCell(c, value.toString());
@@ -796,6 +779,8 @@ function autoEraseRenban(targetCell, useCandidates) {
 }
 
 function autoEraseThermos(targetCell, useCandidates) {
+    if(!Framework.settings['thermos']) return;
+
     var thermos = Framework.app.currentPuzzle.thermos.filter(thermo => isThermo(thermo)).reduce((thermos, thermo) => {
         if(!thermos[thermo.line.wayPoints])
         {
@@ -811,12 +796,12 @@ function autoEraseThermos(targetCell, useCandidates) {
                     if(cell == targetCell) {
                         thermos[thermo.line.wayPoints].hasTarget = true;
                     }
-                    if(useCandidates && cell.candidates.concat(cell.givenCentremarks).length > 0) {
-                        min = Math.min.apply(null, cell.candidates.concat(cell.givenCentremarks).map(candidate => parseInt(candidate)).filter(candidate => candidate > min)) - 1;
-                        max = Math.max.apply(null, cell.candidates.concat(cell.givenCentremarks).map(candidate => parseInt(candidate)));    
+                    if(useCandidates && cell.centres.length > 0) {
+                        min = Math.min.apply(null, cell.centres.map(candidate => parseInt(candidate)).filter(candidate => candidate > min)) - 1;
+                        max = Math.max.apply(null, cell.centres.map(candidate => parseInt(candidate)));    
                     }  
-                    min = parseInt(cell.given || cell.value || min + 1);
-                    max = parseInt(cell.given || cell.value || max);
+                    min = parseInt(cell.given || cell.value || cell.normal || min + 1);
+                    max = parseInt(cell.given || cell.value || cell.normal || max);
                     thermos[thermo.line.wayPoints].cells.forEach((cell, index) => {
                         var newMax =  max - thermos[thermo.line.wayPoints].cells.length + index;
                         cell.max = newMax < cell.max ? newMax : cell.max;
@@ -844,23 +829,25 @@ function autoEraseThermos(targetCell, useCandidates) {
 }
 
 function isThermo(thermo) {
-    return  Framework.app.sourcePuzzle.overlays?.filter(lay => lay.rounded && lay.height >= 0.7 && lay.width >= 0.7).some(lay => lay.backgroundColor.slice(0, 6) == thermo.line.color.slice(0, 6) && lay.center[0] == thermo.line.wayPoints[0][0] && lay.center[1] == thermo.line.wayPoints[0][1] ) || 
-            Framework.app.sourcePuzzle.underlays?.filter(lay => lay.rounded && lay.height >= 0.7 && lay.width >= 0.7).some(lay => lay.backgroundColor.slice(0, 6) == thermo.line.color.slice(0, 6) && lay.center[0] == thermo.line.wayPoints[0][0] && lay.center[1] == thermo.line.wayPoints[0][1] );
+    return  Framework.app.sourcePuzzle.overlays?.filter(lay => lay.rounded && lay.height >= 0.65 && lay.width >= 0.65).some(lay => lay.backgroundColor?.slice(0, 6) == thermo.line.color.slice(0, 6) && lay.center[0] == thermo.line.wayPoints[0][0] && lay.center[1] == thermo.line.wayPoints[0][1] ) || 
+            Framework.app.sourcePuzzle.underlays?.filter(lay => lay.rounded && lay.height >= 0.65 && lay.width >= 0.65).some(lay => lay.backgroundColor?.slice(0, 6) == thermo.line.color.slice(0, 6) && lay.center[0] == thermo.line.wayPoints[0][0] && lay.center[1] == thermo.line.wayPoints[0][1] );
 }
 
 function autoEraseKropkis(targetCell, useCandidates) {
+    if(!Framework.settings['kropkis']) return;
+
     Framework.app.currentPuzzle.kropkis.filter(kropki => kropki.backgroundColor == "#FFFFFF" || kropki.backgroundColor == "#000000").forEach(kropki => {
         var cells = getCells(kropki.center);
         if(!targetCell || cells.includes(targetCell)) { 
             var values = Array.from(Array(9), (_, index) => index + 1);
             
-            cells.filter(cell => !cell.given && !cell.value && cell == targetCell).forEach(cell => {
+            cells.filter(cell => !cell.given && !cell.value && !cell.normal && (cell == targetCell || !targetCell)).forEach(cell => {
                 var otherCell = cells.find(c => c != cell);
-                var value = parseInt(otherCell.given || otherCell.value);
+                var value = parseInt(otherCell.given || otherCell.value || otherCell.normal);
                 if(value) {
                     values = [value];
-                } else if(useCandidates && otherCell.candidates.concat(otherCell.givenCentremarks).length > 0) {
-                    values = otherCell.candidates.concat(otherCell.givenCentremarks).map(candidate => parseInt(candidate));
+                } else if(useCandidates && otherCell.centres.length > 0) {
+                    values = otherCell.centres.map(candidate => parseInt(candidate));
                 }
                 for(var val = 1; val <= 9; val++) {
                     if(kropki.backgroundColor == "#FFFFFF" && values.every(value => val != value + 1 && val != value - 1)) {
@@ -877,17 +864,19 @@ function autoEraseKropkis(targetCell, useCandidates) {
 }
 
 function autoEraseInequality(targetCell, useCandidates) {
+    if(!Framework.settings['inequality']) return;
+    
     Framework.app.currentPuzzle.inequality.filter(inequality => inequality.type == "inequality").forEach(inequality => {
         var cells = getCells(inequality.part.center);
 
-        cells.filter(cell => !cell.given && !cell.value && cell == targetCell).forEach(cell => {
+        cells.filter(cell => !cell.given && !cell.value && !cell.normal && cell == targetCell).forEach(cell => {
             var otherCell = cells.find(c => c != cell);
-            var value = parseInt(otherCell.given || otherCell.value);
-            if(!value && useCandidates && cell.candidates.concat(cell.givenCentremarks).length > 0) {
+            var value = parseInt(otherCell.given || otherCell.value || otherCell.normal);
+            if(!value && useCandidates && cell.centres.length > 0) {
                 if(inequality.part.text === "<") {
-                    value = Math.min.apply(null, otherCell.candidates.concat(otherCell.givenCentremarks).map(candidate => parseInt(candidate)));
+                    value = Math.min.apply(null, otherCell.centres.map(candidate => parseInt(candidate)));
                 } else {
-                    value = Math.max.apply(null, otherCell.candidates.concat(otherCell.givenCentremarks).map(candidate => parseInt(candidate)));    
+                    value = Math.max.apply(null, otherCell.centres.map(candidate => parseInt(candidate)));    
                 }
             }
 
@@ -912,19 +901,21 @@ function eraseInequality(cell, value, lessThan) {
 }
 
 function autoEraseXVS(targetCell, useCandidates) {
+    if(!Framework.settings['xvs']) return;
+
     Framework.app.currentPuzzle.xvs.filter(xvs => xvs.text == "X" || xvs.text == "V").forEach(xvs => {
         var cells = getCells(xvs.center);
         if(!targetCell || cells.includes(targetCell)) {
             var values = Array.from(Array(9), (_, index) => index + 1);
             
             var sum = xvs.text == "X" ? 10 : 5;  
-            cells.filter(cell => !cell.given && !cell.value && cell == targetCell).forEach(cell => {
+            cells.filter(cell => !cell.given && !cell.value && !cell.normal && cell == targetCell).forEach(cell => {
                 var otherCell = cells.find(c => c != cell);
-                var value = parseInt(otherCell.given || otherCell.value);
+                var value = parseInt(otherCell.given || otherCell.value || otherCell.normal);
                 if(value) {
                     values = [value];
-                } else if(useCandidates && otherCell.candidates.concat(cell.givenCentremarks).length > 0) {
-                    values = otherCell.candidates.concat(otherCell.givenCentremarks).map(candidate => parseInt(candidate));
+                } else if(useCandidates && otherCell.centres.length > 0) {
+                    values = otherCell.centres.map(candidate => parseInt(candidate));
                 }
                 for(var val = 1; val <= 9; val++) {
                     if(values.every(v => val != sum - v || val == v)) {
@@ -938,17 +929,19 @@ function autoEraseXVS(targetCell, useCandidates) {
 }
 
 function autoEraseCages(targetCell, useCandidates) {
+    if(!Framework.settings['cages']) return;
+    
     Framework.app.currentPuzzle.cages.filter(cage => cage.style == "killer" && cage.sum).forEach(cage => {
-        var cageCells = getCageCells(cage);
+        var cageCells = Framework.app.puzzle.parseCells(cage.cells);
         if(!targetCell || cageCells.includes(targetCell)) {
-            cageCells.filter(c => !c.given && !c.value).forEach(c => {
+            cageCells.filter(c => !c.given && !c.value && !c.normal).forEach(c => {
                 if(!targetCell || targetCell == c) {
-                    var values = c.candidates.concat(c.givenCentremarks).map(candidate => parseInt(candidate));
+                    var values = c.centres.map(candidate => parseInt(candidate));
                     var otherCells = cageCells.filter(cell => cell != c);
                     values.forEach(value => {
                         if(otherCells.length > 0) {
                             var otherCageCellVals = [];
-                            if(otherCells.length > 0 && otherCells.every(c => c.given || c.value) || useCandidates) {
+                            if(otherCells.length > 0 && otherCells.every(c => c.given || c.value || c.normal) || useCandidates) {
                                 otherCageCellVals = getAllValues(otherCells, [value], true);
                             }
                             if(otherCageCellVals.every(val => val != cage.sum)) {
@@ -984,62 +977,57 @@ function eraseRowCol(row, col, value) {
     eraseCell(cell, value)
 }
 
-function eraseCell(cell, value, skipSame) {
-    if(cell.propContains('centre', value)) {
-        cell.propUnset('centre', value);
-    }
-    if(cell.propContains('corner', value)) {
-        cell.propUnset('corner', value);
-    }
-    if(!skipSame) {
-        autoEraseSame(cell, value);
+function eraseCell(cell, value) {
+    removeFrom(cell.centres, value);
+    removeFrom(cell.corners, value);
+    autoColour(cell);
+}
+
+function addTo(array, value) {
+    var index = array.indexOf(value);
+    if (index == -1) {
+        array.push(value);
     }
 }
 
-function getCageCells(cage) {
-    var cells = [];
-    cage.cells.split(',').forEach(cc => {
-        if(cc.includes('-')) {
-            var row1 = cc.substring(cc.indexOf("r") + 1, cc.indexOf("c"));
-            var column1 = cc.substring(cc.indexOf("c") + 1, cc.indexOf("-"));
+function removeFrom(array, value) {
+    var index = array.indexOf(value);
+    if (index > -1) {
+        array.splice(index, 1);
+    }
+}
 
-            var row2 = cc.substring(cc.lastIndexOf("r") + 1, cc.lastIndexOf("c"));
-            var column2 = cc.substring(cc.lastIndexOf("c") + 1);
-
-            if(row1 == row2) {
-                var row = row1;
-                for(var column = Math.min(column1,column2); column <= Math.max(column1,column2); column++) {
-                    var c = Framework.app.grid.getCell(row - 1, column - 1);
-                    cells.push(c); 
-                }
-            }
-            else if(column1 == column2) {
-                var column = column1;
-                for(var row = Math.min(row1,row2); row <= Math.max(row1,row2); row++) {
-                    var c = Framework.app.grid.getCell(row - 1, column - 1);
-                    cells.push(c); 
-                }
-            }
-        }
-        else {
-            var row = cc.substring(cc.indexOf("r") + 1, cc.lastIndexOf("c"));
-            var column = cc.substring(cc.indexOf("c") + 1);
-            var c = Framework.app.grid.getCell(row - 1, column - 1);
-            cells.push(c); 
-        }                
-    });
-    return cells;
+function toggle(array, value) {
+    var index = array.indexOf(value);
+    if (index > -1) {
+        array.splice(index, 1);
+    } else {
+        array.push(value);
+    }
 }
 
 function pencilMark(fill = true) {
-    var cells = Framework.app.puzzle.selectedCells.length > 0 ? Framework.app.puzzle.selectedCells.map(x => x) : Framework.app.puzzle.cells;
+    working = true;
+    var cells = Framework.app.puzzle.selectedCells.length > 0 ? Framework.app.puzzle.selectedCells : Framework.app.puzzle.cells;
     if(fill) {
-        cells.filter(cell => !cell.given && !cell.value && cell.givenCentremarks.length == 0).forEach(cell => {
-            for(var value = 1; value <= 9; value++) {
-                if(!cell.propContains('centre', value.toString())) {
-                    cell.propSet('centre', value.toString())
+        Framework.app.puzzle.cells.forEach(cell => {
+            if(cell.given || cell.value) {
+                cell.centres = [cell.given || cell.value];
+                cell.corners = [cell.given || cell.value];
+            } else {
+                if(cell.givenCentremarks.length == 0) {
+                    cell.centres = cells.includes(cell) ? Array.from(Array(9), (_, index) => (index + 1).toString()) : cell.candidates.map(x => x);
+                } else {
+                    cell.centres = cell.givenCentremarks.map(x => x);
+                }
+                if(cell.givenCornermarks.length == 0) {
+                    cell.corners = cell.pencilmarks.map(x => x);
+                } else {
+                    cell.corners = cell.givenCentremarks.map(x => x);
                 }
             }
+            cell.normal = null;
+            cell.colors = cell.colours.map(x => x);
         });
     }
     cells.forEach(cell => {
@@ -1053,20 +1041,102 @@ function pencilMark(fill = true) {
         autoEraseArrows(cell, true);
         autoEraseGermanWhisper(cell, true);
         autoEraseRenban(cell, true);
-        autoEraseSame(cell, null, true);
         
         autoErase(cell, true);
         autoColour(cell, true);
+        if(Framework.settings['auto-fill'] && !cell.given && !cell.value && cell.centres.length == 1) {
+            cell.normal = cell.centres[0];
+        }
     });
     if(fill) {
         pencilMark(false);
-    } else {
-        calculateValues();
+        return;
+    } 
+    autoFill();
+    main();
+    working = false;
+}
+
+function autoFill() {
+    var selectedCells = Framework.app.puzzle.selectedCells.map(c => c);
+    var prevTool =  Framework.app.tool;
+
+    var changes = false;
+    for(var value = 1; value <= 9; value++) {
+        var targetCells = Framework.app.puzzle.cells.filter(cell => !cell.given && !cell.value && !cell.normal &&
+            ((cell.candidates.concat(cell.givenCentremarks).includes(value.toString()) && !cell.centres.includes(value.toString())) || 
+             (!cell.candidates.concat(cell.givenCentremarks).includes(value.toString()) && cell.centres.includes(value.toString()))
+            ));
+        if(targetCells.length > 0) {
+            if(Framework.app.tool != 'centre') {
+                Framework.app.changeTool('centre');
+            }
+            if(Framework.app.puzzle.selectedCells != targetCells) {
+                Framework.app.deselect(Framework.app.puzzle.selectedCells);
+                Framework.app.select(targetCells);
+            }
+            Framework.app.doPressDigit(value.toString());
+            changes = true;
+        }
+        targetCells = Framework.app.puzzle.cells.filter(cell => !cell.given && !cell.value && !cell.normal &&
+            ((cell.pencilmarks.concat(cell.givenCentremarks).includes(value.toString()) && !cell.corners.includes(value.toString())) || 
+             (!cell.pencilmarks.concat(cell.givenCentremarks).includes(value.toString()) && cell.corners.includes(value.toString()))
+            ));
+        if(targetCells.length > 0) {
+            if(Framework.app.tool != 'corner') {
+                Framework.app.changeTool('corner');
+            }
+            if(Framework.app.puzzle.selectedCells != targetCells) {
+                Framework.app.deselect(Framework.app.puzzle.selectedCells);
+                Framework.app.select(targetCells);
+            }
+            Framework.app.doPressDigit(value.toString());
+            changes = true;
+        }
+
+        targetCells = Framework.app.puzzle.cells.filter(cell => 
+            ((cell.colours.includes(value.toString()) && !cell.colors.includes(value.toString())) || 
+             (!cell.colours.includes(value.toString()) && cell.colors.includes(value.toString()))
+            ));
+        if(targetCells.length > 0) {
+            if(Framework.app.tool != 'colour') {
+                Framework.app.changeTool('colour');
+            }
+            if(Framework.app.puzzle.selectedCells != targetCells) {
+                Framework.app.deselect(Framework.app.puzzle.selectedCells);
+                Framework.app.select(targetCells);
+            }
+            Framework.app.doPressDigit(value.toString());
+            changes = true;
+        }
+
+        targetCells = Framework.app.puzzle.cells.filter(cell => !cell.given && !cell.value && cell.normal == value.toString());
+        if(targetCells.length > 0) {
+            if(Framework.app.tool != 'normal') {
+                Framework.app.changeTool('normal');
+            }
+            if(Framework.app.puzzle.selectedCells != targetCells) {
+                Framework.app.deselect(Framework.app.puzzle.selectedCells);
+                Framework.app.select(targetCells);
+            }
+            Framework.app.doPressDigit(value.toString());
+            changes = true;
+        }
+    }
+
+    if(changes) {
+        if(Framework.app.puzzle.selectedCells != targetCells) {
+            Framework.app.deselect(Framework.app.puzzle.selectedCells);
+            Framework.app.select(selectedCells);
+        }
+        if(Framework.app.tool != prevTool) {
+            Framework.app.changeTool(prevTool);
+        }     
     }
 }
 
 function calculateValues() {
-    var selectedCells = Framework.app.puzzle.selectedCells.filter(c => c.given || c.value || c.candidates.concat(c.givenCentremarks).length > 0);
+    var selectedCells = Framework.app.puzzle.selectedCells.filter(c => c.given || c.value || c.normal || c.centres?.length > 0);
     if(selectedCells.length > 0) {
         valuesDiv.textContent = "";
         clearTimeout(calculateValuesTimeout);
@@ -1122,7 +1192,7 @@ function calculateValuesInner(selectedCells, targetCell, targetCandidate, blanks
 function getCellGroups(selectedCells) {
     var cellGroups = [];
     Framework.app.currentPuzzle.cages.forEach(cage => {
-        var cageCells = getCageCells(cage); 
+        var cageCells = Framework.app.puzzle.parseCells(cage.cells); 
         var cellGroup = [];
         selectedCells.forEach(cell => { 
             if(cageCells.includes(cell)) {
@@ -1132,21 +1202,21 @@ function getCellGroups(selectedCells) {
         if(cellGroup.length > 0) {
             cellGroups.push(cellGroup);
         }
-    });
+    }); 
     return cellGroups;
 }
 
 function getNextCellGroup(selectedCells, cellGroups, usedCells) {
     return cellGroups.filter(cellGroup => cellGroup.filter(cell => !usedCells.includes(cell)).length > 0).reduce(function(prev, current) {
         var currentCells = current.filter(cell => !usedCells.includes(cell));
-        var currentCandidates = currentCells.reduce((a, b) => (b.given || b.value) ? a.concat([b.given || b.value]) : a.concat(b.candidates.concat(b.givenCentremarks)), []).filter((value, index, self) => self.indexOf(value) === index);
+        var currentCandidates = currentCells.reduce((a, b) => (b.given || b.value || b.normal) ? a.concat([b.given || b.value || b.normal]) : a.concat(b.centres), []).filter((value, index, self) => self.indexOf(value) === index);
 
         if(selectedCells.filter(cell => !usedCells.includes(cell)).every(cell => currentCells.includes(cell))) {
             return currentCells;
         }
 
         var prevCells = prev.filter(cell => !usedCells.includes(cell));
-        var prevCandidates = prevCells.reduce((a, b) => (b.given || b.value) ? a.concat([b.given || b.value]) : a.concat(b.candidates.concat(b.givenCentremarks)), []).filter((value, index, self) => self.indexOf(value) === index);
+        var prevCandidates = prevCells.reduce((a, b) => (b.given || b.value || b.normal) ? a.concat([b.given || b.value || b.normal]) : a.concat(b.centres), []).filter((value, index, self) => self.indexOf(value) === index);
 
         if(selectedCells.filter(cell => !usedCells.includes(cell)).every(cell => prevCells.includes(cell))) {
             return prevCells;
@@ -1173,11 +1243,11 @@ function getAllValues(cells, candidates, blanks) {
     var newCells = cells.filter(c => c != cell);
 
     vals = [];
-    var value = cell.given || cell.value;
+    var value = cell.given || cell.value || cell.normal;
     if(value) {
         vals.push(parseInt(value));
-    } else if(cell.candidates.concat(cell.givenCentremarks).length > 0) {
-        vals = cell.candidates.concat(cell.givenCentremarks).map(candidate => parseInt(candidate));
+    } else if(cell.centres.length > 0) {
+        vals = cell.centres.map(candidate => parseInt(candidate));
     } else if(blanks) {
         vals = Array.from(Array(9), (_, index) => index + 1);
     }
